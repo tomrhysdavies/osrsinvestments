@@ -44,22 +44,31 @@
             </div>
 
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-gray-700 pb-4">
                     <div>
-                        <h2 class="text-xl font-bold text-amber-400">High Volume Items (Ores, Gems, Hides, Bones)</h2>
-                        <p class="text-xs text-gray-400">Compare instant-sell values against rolling historical bounds. Breakout flags isolate market momentum.</p>
+                        <h2 class="text-xl font-bold text-amber-400">High Volume Commodities Watchlist</h2>
+                        <p class="text-xs text-gray-400">Heatmapped rows isolate action zones. Rows glow <span class="text-emerald-400 font-semibold">Green</span> for prime dump targets and <span class="text-cyan-400 font-semibold">Cyan</span> for volume breakouts.</p>
                     </div>
-                    <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-700">
-                        <button id="btn-7d" onclick="setTimeframe(7)" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900">7 Days</button>
-                        <button id="btn-30d" onclick="setTimeframe(30)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">30 Days</button>
-                        <button id="btn-90d" onclick="setTimeframe(90)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">90 Days</button>
+                    
+                    <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-700 self-end lg:self-auto">
+                        <button id="btn-7d" onclick="setTimeframe(7)" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900">7D Window</button>
+                        <button id="btn-30d" onclick="setTimeframe(30)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">30D Window</button>
+                        <button id="btn-90d" onclick="setTimeframe(90)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">90D Window</button>
                     </div>
                 </div>
+
+                <div class="flex flex-wrap gap-2 mb-4 border-b border-gray-700/40 pb-3">
+                    <button id="subtab-gathering" onclick="switchSubTab('gathering')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700">⛏️ Gathering & Supplies</button>
+                    <button id="subtab-combat" onclick="switchSubTab('combat')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">☠️ Combat & Drops</button>
+                    <button id="subtab-herbs" onclick="switchSubTab('herbs')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">🧪 Herbs & Potions</button>
+                    <button id="subtab-custom" onclick="switchSubTab('custom')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">⭐ Custom Watchlist</button>
+                </div>
+                
                 <div class="w-full">
                     <table class="w-full text-left border-collapse table-auto">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                                <th class="pb-3">Item Name</th>
+                                <th class="pb-3 pl-2">Item Name</th>
                                 <th class="pb-3 text-right" id="lbl-low-heading">7-Day Historical Low</th>
                                 <th class="pb-3 text-right" id="lbl-high-heading">7-Day Historical High</th>
                                 <th class="pb-3 text-right">Today's Price</th>
@@ -67,7 +76,7 @@
                                 <th class="pb-3 text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
+                        <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/30 text-sm"></tbody>
                     </table>
                 </div>
             </section>
@@ -103,14 +112,9 @@
                         <h2 class="text-xl font-bold text-emerald-400">⚡ Global High-Yield Flipping Radar (Top 10 Smoothed Slots)</h2>
                         <p class="text-xs text-gray-400">Ranks opportunities based on maximum potential profit per 4-hour slot capacity cap.</p>
                     </div>
-                    
                     <div class="bg-gray-950 p-1 rounded-lg border border-gray-700 flex items-center">
-                        <button id="filter-all" onclick="setPriceFilter('all')" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all">
-                            All Items
-                        </button>
-                        <button id="filter-premium" onclick="setPriceFilter('premium')" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all flex items-center gap-1.5">
-                            👑 High-Tier Only (1M+)
-                        </button>
+                        <button id="filter-all" onclick="setPriceFilter('all')" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all">All Items</button>
+                        <button id="filter-premium" onclick="setPriceFilter('premium')" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all flex items-center gap-1.5">👑 High-Tier Only (1M+)</button>
                     </div>
                 </div>
                 <div class="w-full">
@@ -141,9 +145,9 @@
                                 <input type="text" id="input-name" placeholder="e.g., Runite ore" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-400 mb-1">Category</label>
+                                <label class="block text-xs text-gray-400 mb-1">Category Target</label>
                                 <select id="input-category" onchange="toggleFormFields()" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
-                                    <option value="slayer">High Volume Items</option>
+                                    <option value="slayer">High Volume (Custom Watchlist Tab)</option>
                                     <option value="investment">Long Term Investments</option>
                                 </select>
                             </div>
@@ -162,8 +166,8 @@
                     </div>
                     <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-300 mb-2">Clear Data</h3>
-                            <p class="text-xs text-gray-400">Wipe your active session tracking models back to standard code baselines.</p>
+                            <h3 class="text-sm font-semibold text-gray-300 mb-2">Restore Factory Layout</h3>
+                            <p class="text-xs text-gray-400">Wipe custom overrides and restore the full 46 blueprint master seed configuration.</p>
                         </div>
                         <button onclick="loadDefaultDataset()" class="border border-gray-700 hover:bg-gray-800 text-gray-300 py-2 rounded text-xs mt-4">Reset to Default List</button>
                     </div>
@@ -193,9 +197,7 @@
                         <h2 class="text-xl font-bold text-gray-200">Historical Archives</h2>
                         <p class="text-xs text-gray-400">Immutable ledger tracking your closed capital runs.</p>
                     </div>
-                    <button onclick="wipeTradeHistory()" class="text-xs border border-rose-900 text-rose-400 hover:bg-rose-950/30 px-3 py-1 rounded transition-colors">
-                        ⚠️ Wipe Archive History
-                    </button>
+                    <button onclick="wipeTradeHistory()" class="text-xs border border-rose-900 text-rose-400 hover:bg-rose-950/30 px-3 py-1 rounded transition-colors">⚠️ Wipe Archive History</button>
                 </div>
                 <div class="w-full">
                     <table class="w-full text-left border-collapse table-auto">
@@ -219,11 +221,59 @@
     </div>
 
     <script>
+        // COMBINATION BLUEPRINT SEED: Preloads 46 top core economic assets out of the box
         const INITIAL_SEED = {
             slayerLoot: [
-                { id: 451, name: "Runite Ore" },
-                { id: 536, name: "Dragon Bones" },
-                { id: 1615, name: "Dragonstone" }
+                // 🛠️ Gathering / Supplies
+                { id: 451, name: "Runite Ore", group: "gathering" },
+                { id: 453, name: "Coal", group: "gathering" },
+                { id: 440, name: "Iron Ore", group: "gathering" },
+                { id: 2363, name: "Runite Bar", group: "gathering" },
+                { id: 2361, name: "Adamantite Bar", group: "gathering" },
+                { id: 1515, name: "Yew Logs", group: "gathering" },
+                { id: 1513, name: "Magic Logs", group: "gathering" },
+                { id: 8782, name: "Mahogany Plank", group: "gathering" },
+                { id: 561, name: "Nature Rune", group: "gathering" },
+                { id: 560, name: "Death Rune", group: "gathering" },
+                { id: 565, name: "Blood Rune", group: "gathering" },
+                { id: 566, name: "Soul Rune", group: "gathering" },
+                { id: 21880, name: "Wrath Rune", group: "gathering" },
+                { id: 9144, name: "Runite Bolt", group: "gathering" },
+                { id: 11212, name: "Dragon Arrow", group: "gathering" },
+
+                // ☠️ Combat / Drops
+                { id: 536, name: "Dragon Bones", group: "combat" },
+                { id: 11943, name: "Lava Dragon Bones", group: "combat" },
+                { id: 22124, name: "Superior Dragon Bones", group: "combat" },
+                { id: 1753, name: "Green Dragonhide", group: "combat" },
+                { id: 1751, name: "Blue Dragonhide", group: "combat" },
+                { id: 1749, name: "Red Dragonhide", group: "combat" },
+                { id: 1747, name: "Black Dragonhide", group: "combat" },
+                { id: 1615, name: "Dragonstone", group: "combat" },
+                { id: 1617, name: "Uncut Diamond", group: "combat" },
+                { id: 1619, name: "Uncut Ruby", group: "combat" },
+                { id: 11335, name: "Dragon Med Helm", group: "combat" },
+                { id: 4087, name: "Dragon Platelegs", group: "combat" },
+                { id: 12934, name: "Zulrah's Scales", group: "combat" },
+                { id: 21975, name: "Vorkath's Head", group: "combat" },
+
+                // 🧪 Herbs / Potions
+                { id: 207, name: "Grimy Ranarr Weed", group: "herbs" },
+                { id: 211, name: "Grimy Avantoe", group: "herbs" },
+                { id: 213, name: "Grimy Kwuarm", group: "herbs" },
+                { id: 215, name: "Grimy Cadantine", group: "herbs" },
+                { id: 217, name: "Grimy Dwarf Weed", group: "herbs" },
+                { id: 2485, name: "Grimy Lantadyme", group: "herbs" },
+                { id: 3049, name: "Grimy Toadflax", group: "herbs" },
+                { id: 3051, name: "Grimy Snapdragon", group: "herbs" },
+                { id: 2440, name: "Super Strength(4)", group: "herbs" },
+                { id: 2442, name: "Super Attack(4)", group: "herbs" },
+                { id: 2444, name: "Ranging Potion(4)", group: "herbs" },
+                { id: 3024, name: "Super Restore(4)", group: "herbs" },
+                { id: 6685, name: "Saradomin Brew(4)", group: "herbs" },
+                { id: 12695, name: "Super Combat Potion(4)", group: "herbs" },
+                { id: 22647, name: "Bastion Potion(4)", group: "herbs" },
+                { id: 12625, name: "Stamina Potion(4)", group: "herbs" }
             ],
             investments: [
                 { id: 26219, name: "Osmumten's Fang", qty: 1, entryCost: 18500000, exitTarget: 22000000 },
@@ -236,7 +286,8 @@
         let itemDictionary = null; 
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
-        let currentPriceFilter = "all"; // Options config: "all" or "premium"
+        let currentPriceFilter = "all"; 
+        let activeSubTab = "gathering"; // Default selected view tab sector
 
         function calculateGETax(price) {
             const rawTax = Math.floor(price * 0.02);
@@ -279,7 +330,21 @@
             if (tab === "history") renderHistoryLedger();
         }
 
-        // TRIGGER CONTROL: Refreshes the radar layout based on your chosen price tier segment button
+        // CONTROL NAVIGATOR: Controls rendering filter parameters for sub-tab elements inside high volume block
+        function switchSubTab(targetTab) {
+            activeSubTab = targetTab;
+            const subtabs = ["gathering", "combat", "herbs", "custom"];
+            subtabs.forEach(t => {
+                const el = document.getElementById(`subtab-${t}`);
+                if (t === targetTab) {
+                    el.className = "px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700";
+                } else {
+                    el.className = "px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200";
+                }
+            });
+            fetchLivePrices(); // Re-render lists smoothly
+        }
+
         function setPriceFilter(mode) {
             currentPriceFilter = mode;
             const btnAll = document.getElementById("filter-all");
@@ -292,7 +357,7 @@
                 btnAll.className = "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all";
                 btnPremium.className = "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all";
             }
-            renderFlippingRadar(rawLivePrices); // Re-calculate instantly using available memory cache records
+            renderFlippingRadar(rawLivePrices); 
         }
 
         function setTimeframe(days) {
@@ -350,8 +415,14 @@
                 if (currentTimeframe === 30) { timestep = "6h"; recordsToSlice = -120; }
                 else if (currentTimeframe === 90) { timestep = "24h"; recordsToSlice = -90; }
 
+                // Filter down target loop arrays to match the actively chosen sub-navigation tab category sector
+                const activeSlayerCollection = userDatabase.slayerLoot.filter(i => {
+                    if (activeSubTab === "custom") return !i.group; // Manually added fields fall here
+                    return i.group === activeSubTab;
+                });
+
                 const historicalRecords = {};
-                for (const item of userDatabase.slayerLoot) {
+                for (const item of activeSlayerCollection) {
                     try {
                         const tsResponse = await fetch(`https://prices.runescape.wiki/api/v1/osrs/timeseries?id=${item.id}&timestep=${timestep}`, {
                             headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
@@ -373,7 +444,7 @@
                         }
                     } catch (e) { console.error(e); }
                 }
-                renderSlayerTable(rawLivePrices, historicalRecords);
+                renderSlayerTable(rawLivePrices, historicalRecords, activeSlayerCollection);
                 renderInvestmentTable(rawLivePrices);
                 renderFlippingRadar(radarPrices || rawLivePrices); 
                 syncIndicator.innerText = `Synced: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
@@ -381,37 +452,57 @@
             } catch (err) { console.error(err); }
         }
 
-        function renderSlayerTable(prices, history) {
+        // HEATMAP MATRIX: Renders data grids featuring dynamic visual row background alert tinting styles
+        function renderSlayerTable(prices, history, targetedItems) {
             const target = document.getElementById("slayer-loot-rows"); target.innerHTML = "";
-            userDatabase.slayerLoot.forEach((item, index) => {
+            
+            if(targetedItems.length === 0) {
+                target.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-gray-500">No assets logged under this tab section yet. Use the form tool panel down below to append targets.</td></tr>`;
+                return;
+            }
+
+            targetedItems.forEach((item) => {
                 const live = prices[item.id]; const hist = history[item.id];
                 let currentSell = live ? ((live.avgLowPrice > 0) ? live.avgLowPrice : (live.avgHighPrice || 0)) : 0;
                 const marketLow = hist && hist.min ? hist.min : Math.round(currentSell * 0.95);
                 const marketHigh = hist && hist.max ? hist.max : Math.round(currentSell * 1.05);
                 const positionPct = (marketHigh - marketLow) > 0 ? ((currentSell - marketLow) / (marketHigh - marketLow)) * 100 : 50;
 
-                let stateLabel = "NEUTRAL"; let badgeStyle = "bg-gray-700 text-gray-300 border-gray-600";
-                if ((positionPct >= 85) && (hist && hist.recentVolume > (hist.avgVolume * 1.5))) {
-                    stateLabel = "⚡ BREAKOUT (HOLD)"; badgeStyle = "bg-cyan-950 text-cyan-400 border-cyan-700 animate-pulse";
+                const volumeIsSpiking = hist && hist.recentVolume > (hist.avgVolume * 1.5);
+                const priceIsAtCeiling = positionPct >= 85;
+
+                let stateLabel = "NEUTRAL"; 
+                let badgeStyle = "bg-gray-700 text-gray-300 border-gray-600";
+                let rowColorStyle = "bg-transparent"; // Base neutral style
+
+                if (priceIsAtCeiling && volumeIsSpiking) {
+                    stateLabel = "⚡ BREAKOUT (HOLD)"; 
+                    badgeStyle = "bg-cyan-950 text-cyan-400 border-cyan-600 animate-pulse";
+                    rowColorStyle = "bg-cyan-950/20 border-l-2 border-cyan-500"; // Cyan Glow
                 } else if (positionPct <= 30) {
-                    stateLabel = "HOLD & WAIT"; badgeStyle = "bg-amber-950 text-amber-400 border-amber-800";
+                    stateLabel = "HOLD & WAIT"; 
+                    badgeStyle = "bg-amber-950 text-amber-400 border-amber-800";
+                    rowColorStyle = "bg-amber-950/10"; // Amber Row
                 } else if (positionPct >= 70) {
-                    stateLabel = "STRONG SELL"; badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
+                    stateLabel = "STRONG SELL"; 
+                    badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
+                    rowColorStyle = "bg-emerald-950/20 border-l-2 border-emerald-500"; // Green Action Row
                 }
 
+                // Global delete tracking pointer calculation index matching parent configurations
+                const globalIndex = userDatabase.slayerLoot.findIndex(i => i.id === item.id);
+
                 target.innerHTML += `
-                    <tr class="hover:bg-gray-700/20">
-                        <td class="py-4 font-semibold text-gray-200">${item.name}</td>
-                        <td class="py-4 text-right font-mono text-gray-400">${marketLow.toLocaleString()} GP</td>
-                        <td class="py-4 text-right font-mono text-gray-400">${marketHigh.toLocaleString()} GP</td>
-                        <td class="py-4 text-right font-mono font-bold text-amber-500">${currentSell.toLocaleString()} GP</td>
-                        <td class="py-4 text-center">
-                            <div class="relative inline-block group cursor-help">
-                                <span class="text-xs font-bold px-2.5 py-1 rounded border ${badgeStyle}">${stateLabel}</span>
-                            </div>
+                    <tr class="hover:bg-gray-700/20 transition-colors ${rowColorStyle}">
+                        <td class="py-3.5 pl-3 font-semibold text-gray-200">${item.name}</td>
+                        <td class="py-3.5 text-right font-mono text-gray-400">${marketLow.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono text-gray-400">${marketHigh.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono font-bold text-amber-500">${currentSell.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-center">
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded border ${badgeStyle}">${stateLabel}</span>
                         </td>
-                        <td class="py-4 text-center">
-                            <button onclick="deleteAsset('slayer', ${index})" class="text-xs text-rose-400 hover:underline">Remove</button>
+                        <td class="py-3.5 text-center">
+                            <button onclick="deleteAsset('slayer', ${globalIndex})" class="text-xs text-rose-400 hover:text-rose-300 hover:underline">Remove</button>
                         </td>
                     </tr>`;
             });
@@ -451,11 +542,9 @@
         }
 
         function renderFlippingRadar(prices) {
-            const target = document.getElementById("flipping-radar-rows"); 
-            target.innerHTML = "";
+            const target = document.getElementById("flipping-radar-rows"); target.innerHTML = "";
 
             if (!prices || !itemDictionary) return;
-
             const candidates = [];
             
             Object.keys(itemDictionary).forEach(keyString => {
@@ -463,13 +552,10 @@
                 const liveData = prices[itemMeta.id];
                 
                 if (!liveData || !liveData.avgHighPrice || !liveData.avgLowPrice || !itemMeta.limit) return;
-
                 const buyPrice = liveData.avgLowPrice;
 
-                // STRATEGIC UPDATE: If High-Tier mode is active, filter out anything where buy low is under 1,000,000 GP
                 if (currentPriceFilter === "premium" && buyPrice < 1000000) return;
 
-                // Trade volume activity threshold checks
                 const immediateFiveMinVolume = (liveData.highPriceVolume || 0) + (liveData.lowPriceVolume || 0);
                 const minimumRequiredMomentum = Math.ceil(itemMeta.limit * 0.05);
                 if (immediateFiveMinVolume < minimumRequiredMomentum) return;
@@ -488,13 +574,8 @@
                 const totalBuyInCapital = buyPrice * itemMeta.limit;
 
                 candidates.push({
-                    name: itemMeta.name,
-                    buy: buyPrice,
-                    sell: sellPrice,
-                    unitProfit: netProfitPerUnit,
-                    limit: itemMeta.limit,
-                    slotYield: maxSlotYieldGP,
-                    capitalRequired: totalBuyInCapital
+                    name: itemMeta.name, buy: buyPrice, sell: sellPrice, unitProfit: netProfitPerUnit,
+                    limit: itemMeta.limit, slotYield: maxSlotYieldGP, capitalRequired: totalBuyInCapital
                 });
             });
 
@@ -502,7 +583,7 @@
             const topTenScalableFlips = candidates.slice(0, 10);
 
             if (topTenScalableFlips.length === 0) {
-                target.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-500 leading-relaxed">No high-margin items matching your price floor are moving right now. Try switching back to All Items.</td></tr>`;
+                target.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-500 leading-relaxed">No high-margin items matching constraints are moving.</td></tr>`;
                 return;
             }
 
@@ -533,20 +614,14 @@
             const netProfitPerUnit = netRevenuePerUnit - item.entryCost;
             
             const closedEntry = {
-                name: item.name,
-                qty: item.qty,
-                buyPrice: item.entryCost,
-                salePrice: salePrice,
+                name: item.name, qty: item.qty, buyPrice: item.entryCost, salePrice: salePrice,
                 profitTotal: Math.round(netProfitPerUnit * item.qty),
-                roi: ((netProfitPerUnit / item.entryCost) * 100).toFixed(1),
-                date: new Date().toLocaleDateString()
+                roi: ((netProfitPerUnit / item.entryCost) * 100).toFixed(1), date: new Date().toLocaleDateString()
             };
 
             userDatabase.history.unshift(closedEntry);
             userDatabase.investments.splice(index, 1);
-            
-            saveToLocalStorage();
-            fetchLivePrices();
+            saveToLocalStorage(); fetchLivePrices();
             alert("Position successfully logged into the historical archives.");
         }
 
@@ -579,17 +654,19 @@
             if (!rawName) return alert("Please type an item name.");
 
             const matchedMeta = itemDictionary[rawName.toLowerCase()];
-            if (!matchedMeta) return alert(`Could not find that item. Verify spelling rules match the OSRS Wiki.`);
+            if (!matchedMeta) return alert(`Could not find that item name layout.`);
 
             if (category === "slayer") {
-                userDatabase.slayerLoot.push({ id: matchedMeta.id, name: rawName });
+                // If added manually via form console, it leaves group undefined so it routes into the Custom Watchlist subtab
+                userDatabase.slayerLoot.push({ id: matchedMeta.id, name: matchedMeta.name });
+                activeSubTab = "custom"; // Automatically shift view tab to Custom to show your selection
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
                 const qtyVal = parseInt(document.getElementById("input-qty").value);
                 if (isNaN(entryVal) || isNaN(qtyVal)) return alert("Fill entry parameters cleanly.");
 
                 userDatabase.investments.push({ 
-                    id: matchedMeta.id, name: rawName, qty: qtyVal, entryCost: entryVal, exitTarget: Math.round(entryVal * 1.12) 
+                    id: matchedMeta.id, name: matchedMeta.name, qty: qtyVal, entryCost: entryVal, exitTarget: Math.round(entryVal * 1.12) 
                 });
             }
             saveToLocalStorage();
@@ -610,10 +687,12 @@
         }
 
         function loadDefaultDataset() {
-            if (confirm("Reset tracking lists back to default samples?")) {
+            if (confirm("Reset tracking lists back to factory pre-seeded blueprint configuration?")) {
                 localStorage.removeItem("osrs_dashboard_db");
                 userDatabase = JSON.parse(JSON.stringify(INITIAL_SEED));
-                saveToLocalStorage(); fetchLivePrices(); switchView('live');
+                saveToLocalStorage(); 
+                activeSubTab = "gathering";
+                fetchLivePrices(); switchView('live');
             }
         }
 
