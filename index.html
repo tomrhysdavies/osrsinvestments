@@ -52,7 +52,6 @@
                     </div>
                 </div>
                 
-                <!-- FIX: Removed overflow wrapper to allow unclipped vertical overlays -->
                 <div class="w-full">
                     <table class="w-full text-left border-collapse table-auto sm:table-fixed md:table-auto">
                         <thead>
@@ -66,7 +65,7 @@
                             </tr>
                         </thead>
                         <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Dynamic rows -->
+                            <!-- Loaded via Script dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -76,17 +75,18 @@
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-cyan-400">Long Term Investments (Boss / Rare Drops)</h2>
-                    <p class="text-xs text-gray-400">Tracks performance and clear net profit percentages on your premium holds, factoring in the 1% GE Tax.</p>
+                    <p class="text-xs text-gray-400">Tracks margins, total quantity stacks, and net gold profit returns factoring in the updated 2% GE Tax (5M Cap).</p>
                 </div>
-                <!-- FIX: Removed overflow wrapper to allow unclipped vertical overlays -->
                 <div class="w-full">
                     <table class="w-full text-left border-collapse table-auto sm:table-fixed md:table-auto">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                                 <th class="pb-3">Unique Item Name</th>
+                                <th class="pb-3 text-right">Qty</th>
                                 <th class="pb-3 text-right">Your Buy Price</th>
-                                <th class="pb-3 text-right">Auto Target Exit</th>
+                                <th class="pb-3 text-right">Target Exit (+12%)</th>
                                 <th class="pb-3 text-right">Live Price (Mid)</th>
+                                <th class="pb-3 text-right">Total Net Profit</th>
                                 <th class="pb-3 text-right">Net ROI %</th>
                                 <th class="pb-3 text-center">Position Status</th>
                                 <th class="pb-3 text-center">Actions</th>
@@ -103,9 +103,9 @@
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-emerald-400">Live Quick-Flipping Radar</h2>
-                    <p class="text-xs text-gray-400">Real-time spreads for rapid day-trading margin runs. Buy at Low, Sell at High (Factoring 1% GE Tax).</p>
+                    <p class="text-xs text-gray-400">Real-time spreads for rapid day-trading margin runs. Buy at Low, Sell at High (Factoring 2% GE Tax, 5M Cap).</p>
                 </div>
-                <div class="w-full overflow-x-auto sm:overflow-visible">
+                <div class="w-full">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
@@ -146,10 +146,14 @@
                             </div>
                         </div>
 
-                        <div id="fields-investment" class="grid grid-cols-1 gap-4 hidden">
+                        <div id="fields-investment" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
                             <div>
                                 <label class="block text-xs text-gray-400 mb-1">What did you buy it for? (GP per item)</label>
                                 <input type="number" id="input-entry" placeholder="e.g., 18500000" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Quantity Owned</label>
+                                <input type="number" id="input-qty" placeholder="e.g., 91" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
                             </div>
                         </div>
 
@@ -182,8 +186,8 @@
                 { id: 2363, name: "Runite Bar" }
             ],
             investments: [
-                { id: 26219, name: "Osmumten's Fang", entryCost: 18500000, exitTarget: 22000000 },
-                { id: 25865, name: "Bow of Faerdhinen (Inactive)", entryCost: 92000000, exitTarget: 105000000 }
+                { id: 26219, name: "Osmumten's Fang", qty: 1, entryCost: 18500000, exitTarget: 22000000 },
+                { id: 25865, name: "Bow of Faerdhinen (Inactive)", qty: 1, entryCost: 92000000, exitTarget: 105000000 }
             ]
         };
 
@@ -191,6 +195,12 @@
         let itemDictionary = null; 
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
+
+        // HELPER RULE: Dynamically calculates the new 2% GE Tax capped at 5M GP per item sold
+        function calculateGETax(price) {
+            const rawTax = Math.floor(price * 0.02);
+            return Math.min(rawTax, 5000000);
+        }
 
         async function initApp() {
             const localData = localStorage.getItem("osrs_dashboard_db");
@@ -360,7 +370,6 @@
                                 <span class="text-xs font-bold px-2.5 py-1 rounded border ${badgeStyle}">
                                     ${stateLabel}
                                 </span>
-                                <!-- FIX REVERTED: Now floats cleanly upward (bottom-full) with absolute high z-indexing layer coverage -->
                                 <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 hidden group-hover:flex flex-col bg-gray-950 text-gray-200 text-xs rounded-lg p-3 border border-gray-700 shadow-2xl z-50 pointer-events-none">
                                     <p class="font-medium leading-relaxed">${tooltipText}</p>
                                     <div class="w-2 h-2 bg-gray-950 border-r border-b border-gray-700 absolute top-full left-1/2 -translate-x-1/2 -mt-1 rotate-45"></div>
@@ -388,18 +397,24 @@
                     } else { currentPrice = live.high || live.low || 0; }
                 }
 
-                const revenueNet = currentPrice * 0.99;
-                const profitNet = revenueNet - item.entryCost;
-                const roi = ((profitNet / item.entryCost) * 100).toFixed(1);
+                const itemQty = item.qty || 1;
+
+                // TAX UPDATE: Net revenue now calculates using our conditional 2% cap rule
+                const taxPaidPerUnit = calculateGETax(currentPrice);
+                const revenueNetPerUnit = currentPrice - taxPaidPerUnit;
+                const profitNetPerUnit = revenueNetPerUnit - item.entryCost;
+                
+                const totalNetProfit = Math.round(profitNetPerUnit * itemQty);
+                const roi = ((profitNetPerUnit / item.entryCost) * 100).toFixed(1);
 
                 let stateLabel = "ACCUMULATING";
                 let badgeStyle = "bg-gray-800 text-gray-400 border-gray-600";
-                let tooltipText = "Position is open. Price is still fluctuating below your target exit trigger threshold.";
+                let tooltipText = "Position is open. Price is still fluctuating below your targeted profit baseline.";
 
                 if (currentPrice >= item.exitTarget) {
                     stateLabel = "TAKE PROFIT";
                     badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
-                    tooltipText = "Asset has breached your targeted exit boundary! Sell now to realize your gains.";
+                    tooltipText = "Asset has breached your targeted exit boundary (+12% over entry cost)! Sell now to realize your gains.";
                 } else if (roi < 0) {
                     stateLabel = "UNDERWATER";
                     badgeStyle = "bg-rose-950 text-rose-400 border-rose-900";
@@ -408,18 +423,20 @@
 
                 const sign = roi > 0 ? "+" : "";
                 const roiColor = roi >= 0 ? "text-emerald-400" : "text-rose-400";
+                const profitColor = totalNetProfit >= 0 ? "text-emerald-500 font-bold" : "text-rose-500 font-bold";
 
                 target.innerHTML += `
                     <tr class="hover:bg-gray-700/20">
                         <td class="py-4 font-semibold text-gray-100">${item.name}</td>
+                        <td class="py-4 text-right font-mono text-gray-300">${itemQty.toLocaleString()}</td>
                         <td class="py-4 text-right font-mono text-gray-400">${item.entryCost.toLocaleString()} GP</td>
                         <td class="py-4 text-right font-mono text-gray-400">${item.exitTarget.toLocaleString()} GP</td>
                         <td class="py-4 text-right font-mono font-bold text-cyan-400">${currentPrice.toLocaleString()} GP</td>
+                        <td class="py-4 text-right font-mono ${profitColor}">${totalNetProfit.toLocaleString()} GP</td>
                         <td class="py-4 text-right font-mono font-bold ${roiColor}">${sign}${roi}%</td>
                         <td class="py-4 text-center">
                             <div class="relative inline-block group cursor-help">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded border ${badgeStyle}">${stateLabel}</span>
-                                <!-- FIX REVERTED: Now floats cleanly upward (bottom-full) with absolute high z-indexing layer coverage -->
                                 <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 hidden group-hover:flex flex-col bg-gray-950 text-gray-200 text-xs rounded-lg p-3 border border-gray-700 shadow-2xl z-50 pointer-events-none">
                                     <p class="font-medium leading-relaxed">${tooltipText}</p>
                                     <div class="w-2 h-2 bg-gray-950 border-r border-b border-gray-700 absolute top-full left-1/2 -translate-x-1/2 -mt-1 rotate-45"></div>
@@ -447,7 +464,9 @@
                 const buyPrice = live.low;    
                 const sellPrice = live.high;  
                 const grossSpread = sellPrice - buyPrice;
-                const taxPaid = Math.floor(sellPrice * 0.01); 
+                
+                // TAX UPDATE: Flipping spread calculations now use our 2% cap engine rules natively
+                const taxPaid = calculateGETax(sellPrice); 
                 const netProfitPerUnit = grossSpread - taxPaid;
                 const roi = ((netProfitPerUnit / buyPrice) * 100).toFixed(2);
 
@@ -481,15 +500,25 @@
                 userDatabase.slayerLoot.push({ id: matchedId, name: rawName });
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
+                const qtyVal = parseInt(document.getElementById("input-qty").value);
+                
                 if (isNaN(entryVal) || entryVal <= 0) return alert("Please enter your purchase price.");
+                if (isNaN(qtyVal) || qtyVal <= 0) return alert("Please enter a valid quantity amount.");
 
                 const calculatedExit = Math.round(entryVal * 1.12);
-                userDatabase.investments.push({ id: matchedId, name: rawName, entryCost: entryVal, exitTarget: calculatedExit });
+                userDatabase.investments.push({ 
+                    id: matchedId, 
+                    name: rawName, 
+                    qty: qtyVal, 
+                    entryCost: entryVal, 
+                    exitTarget: calculatedExit 
+                });
             }
 
             saveToLocalStorage();
             nameField.value = "";
             document.getElementById("input-entry").value = "";
+            document.getElementById("input-qty").value = "";
             fetchLivePrices();
         }
 
