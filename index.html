@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSRS GE Market Watch</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; }
@@ -16,7 +15,6 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
-        <!-- App Header -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-4 mb-6 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">
@@ -25,7 +23,6 @@
                 <p class="text-gray-400 text-sm mt-1">Track live banking tabs or analyze historical completed trade statistics.</p>
             </div>
             
-            <!-- SYSTEM DESK INTERACTIVE TABS -->
             <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-800">
                 <button id="tab-live" onclick="switchView('live')" class="px-4 py-2 text-xs font-bold rounded transition-colors bg-amber-600 text-gray-900">
                     📈 Live Market Desk
@@ -36,9 +33,7 @@
             </div>
         </header>
 
-        <!-- VIEW PANEL 1: LIVE MARKET MONITOR -->
         <div id="panel-live" class="space-y-8">
-            <!-- HEADER REFRESH BLOCK -->
             <div class="flex justify-end items-center gap-3">
                 <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
                     Status: Initializing...
@@ -48,7 +43,6 @@
                 </button>
             </div>
 
-            <!-- SECTION 1: HIGH VOLUME ITEMS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
@@ -78,7 +72,6 @@
                 </div>
             </section>
 
-            <!-- SECTION 2: LONG TERM INVESTMENTS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-cyan-400">Long Term Investments (Boss / Rare Drops)</h2>
@@ -104,33 +97,30 @@
                 </div>
             </section>
 
-            <!-- SECTION 3: AUTOMATED REAL-TIME GLOBAL SCANNER -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
-                    <h2 class="text-xl font-bold text-emerald-400">⚡ Global Live Flipping Radar (Top 10 Net ROI)</h2>
-                    <p class="text-xs text-gray-400">Scans the entire game economy in real-time using live hourly records. Displays liquid items exceeding **250 daily trades**, sorted cleanly by post-tax Net ROI % margins.</p>
+                    <h2 class="text-xl font-bold text-emerald-400">⚡ Global High-Yield Flipping Radar (Top 10 Scalable Slots)</h2>
+                    <p class="text-xs text-gray-400">Calculates true 4-hour buy limits against live margins. Discards low-value junk and ranks opportunities entirely by **Maximum Potential Profit per GE Slot Cap**.</p>
                 </div>
                 <div class="w-full">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                                 <th class="pb-3">Item Name</th>
-                                <th class="pb-3 text-right">GE Buy Offer (Low)</th>
-                                <th class="pb-3 text-right">GE Sell Offer (High)</th>
-                                <th class="pb-3 text-right">Gross Spread</th>
+                                <th class="pb-3 text-right">Buy Price (Low)</th>
+                                <th class="pb-3 text-right">Sell Price (High)</th>
                                 <th class="pb-3 text-right">Net Profit / Unit</th>
-                                <th class="pb-3 text-center">Estimated Daily Vol</th>
-                                <th class="pb-3 text-center">Net ROI %</th>
+                                <th class="pb-3 text-center">4H Limit</th>
+                                <th class="pb-3 text-right text-cyan-400">Max Slot Profit (4H)</th>
+                                <th class="pb-3 text-right text-gray-400">Total Buy-In Capital</th>
                             </tr>
                         </thead>
                         <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Populated automatically by the global algorithmic engine -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- SECTION 4: ADD ITEMS TO WATCHLIST -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <h2 class="text-lg font-bold text-gray-200 mb-4 flex items-center gap-2">🛠️ Add Items to Watchlist</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -171,7 +161,6 @@
             </section>
         </div>
 
-        <!-- VIEW PANEL 2: ARCHIVED HISTORICAL LEDGER -->
         <div id="panel-history" class="hidden space-y-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 shadow-md">
@@ -233,9 +222,8 @@
             history: []
         };
 
-        let userDatabase = { slayerLoot: [], investments: [], history: [] };
+        let userDatabase = { slayerLoot: [], investments: [] , history: [] };
         let itemDictionary = null; 
-        let reverseItemDictionary = null; 
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
 
@@ -300,11 +288,13 @@
                 });
                 const mappingArray = await response.json();
                 itemDictionary = {};
-                reverseItemDictionary = {};
                 mappingArray.forEach(item => { 
-                    const cleanName = item.name.trim();
-                    itemDictionary[cleanName.toLowerCase()] = item.id; 
-                    reverseItemDictionary[item.id] = cleanName;
+                    // ENHANCEMENT: Store both the trade ID and native 4-hour trade limit on the index registry reference
+                    itemDictionary[item.name.trim().toLowerCase()] = {
+                        id: item.id,
+                        name: item.name.trim(),
+                        limit: item.limit || 0
+                    }; 
                 });
             } catch (err) { console.error(err); }
         }
@@ -313,7 +303,6 @@
             const syncIndicator = document.getElementById("sync-indicator");
             syncIndicator.innerText = "Analyzing Volumes & Prices...";
             try {
-                // FIXED DATA ROUTE: Now loads the hourly volume metrics payload directly from /1h wrapper endpoint
                 const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/1h", {
                     headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
                 });
@@ -424,21 +413,23 @@
             });
         }
 
-        // FIXED FIELD MAPPINGS: Refactored to scan the accurate hourly data fields (avgLowPrice, avgHighPrice, highPriceVolume, lowPriceVolume)
+        // RE-ENGINEERED RADAR MODULE: High-yield algorithmic limit-aware sorter engine
         function renderFlippingRadar(prices) {
             const target = document.getElementById("flipping-radar-rows"); 
             target.innerHTML = "";
 
-            if (!prices || !reverseItemDictionary) return;
+            if (!prices || !itemDictionary) return;
 
             const candidates = [];
-            const itemIds = Object.keys(prices);
+            
+            // Loop through all items loaded into our mapping index registry
+            Object.keys(itemDictionary).forEach(keyString => {
+                const itemMeta = itemDictionary[keyString];
+                const liveData = prices[itemMeta.id];
+                
+                if (!liveData || !liveData.avgHighPrice || !liveData.avgLowPrice || !itemMeta.limit) return;
 
-            itemIds.forEach(id => {
-                const liveData = prices[id];
-                if (!liveData || !liveData.avgHighPrice || !liveData.avgLowPrice) return;
-
-                // 1. RESOLVED VOLUME CHECK: Uses the explicit hourly quantity parameters present on /1h response
+                // 1. DYNAMIC FLUIDITY SCREENING
                 const hourlyVol = (liveData.highPriceVolume || 0) + (liveData.lowPriceVolume || 0);
                 const estimatedDailyVolume = hourlyVol * 24;
                 if (estimatedDailyVolume < 250) return;
@@ -448,46 +439,49 @@
                 const grossSpread = sellPrice - buyPrice;
                 if (grossSpread <= 0) return;
 
-                // 2. APPLY THE 2% POST-TAX FORMULA RULES
+                // 2. 2% GE TAX PROCESSING CAP DEDUCTION
                 const tax = calculateGETax(sellPrice);
-                const netProfit = grossSpread - tax;
-                if (netProfit <= 0) return;
+                const netProfitPerUnit = grossSpread - tax;
+                if (netProfitPerUnit <= 0) return;
 
-                // 3. GENERATE POST-TAX NET ROI METRICS
-                const netRoi = (netProfit / buyPrice) * 100;
+                // 3. CAP COMPUTE CALCULATION: Net Profit per item multiplied by total 4-hour buy capacity limit
+                const maxSlotYieldGP = Math.round(netProfitPerUnit * itemMeta.limit);
+                
+                // CRITICAL SIEVE FILTER: Discard low-scale trade lines that cannot generate at least 200k gold per offer cycle
+                if (maxSlotYieldGP < 200000) return;
 
-                const cleanItemName = reverseItemDictionary[id] || `Unknown Item (${id})`;
+                const totalBuyInCapital = buyPrice * itemMeta.limit;
 
                 candidates.push({
-                    name: cleanItemName,
+                    name: itemMeta.name,
                     buy: buyPrice,
                     sell: sellPrice,
-                    spread: grossSpread,
-                    profit: netProfit,
-                    volume: estimatedDailyVolume,
-                    roi: netRoi
+                    unitProfit: netProfitPerUnit,
+                    limit: itemMeta.limit,
+                    slotYield: maxSlotYieldGP,
+                    capitalRequired: totalBuyInCapital
                 });
             });
 
-            // 4. SORT BY HIGHEST Post-Tax Net ROI % AND TRUNCATE THE LIST TO THE TOP 10 WINNERS
-            candidates.sort((a, b) => b.roi - a.roi);
-            const topTenFlips = candidates.slice(0, 10);
+            // 4. SORT BY ABSOLUTE HIGHEST MAX SLOT YIELD DOWNSCALE
+            candidates.sort((a, b) => b.slotYield - a.slotYield);
+            const topTenScalableFlips = candidates.slice(0, 10);
 
-            if (topTenFlips.length === 0) {
-                target.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-500 leading-relaxed">No high-margin liquid commodities discovered. Try synchronizing prices again in a minute.</td></tr>`;
+            if (topTenFlipsLen = topTenScalableFlips.length === 0) {
+                target.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-500 leading-relaxed">Scanning OSRS markets... No high-yield scalable slots found meeting liquidity constraints. Refresh in a moment.</td></tr>`;
                 return;
             }
 
-            topTenFlips.forEach(item => {
+            topTenScalableFlips.forEach(item => {
                 target.innerHTML += `
                     <tr class="hover:bg-gray-700/20 transition-all">
                         <td class="py-3.5 font-semibold text-gray-200">${item.name}</td>
-                        <td class="py-3.5 text-right font-mono text-emerald-400 font-bold">${item.buy.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono text-orange-400">${item.sell.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono text-gray-400">${item.spread.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono text-emerald-400 font-bold">+${item.profit.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-center font-mono text-cyan-400 font-medium">${item.volume.toLocaleString()}</td>
-                        <td class="py-3.5 text-center font-mono font-black text-emerald-400">${item.roi.toFixed(2)}%</td>
+                        <td class="py-3.5 text-right font-mono text-gray-400">${item.buy.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono text-gray-400">${item.sell.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono text-emerald-400 font-medium">+${item.unitProfit.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-center font-mono text-gray-300 font-medium">${item.limit.toLocaleString()}</td>
+                        <td class="py-3.5 text-right font-mono text-cyan-400 font-black">${item.slotYield.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono text-gray-500 text-xs">${item.capitalRequired.toLocaleString()} GP</td>
                     </tr>`;
             });
         }
@@ -550,18 +544,18 @@
             const category = document.getElementById("input-category").value;
             if (!rawName) return alert("Please type an item name.");
 
-            const matchedId = itemDictionary[rawName.toLowerCase()];
-            if (!matchedId) return alert(`Could not find that item. Verify spelling rules match the OSRS Wiki.`);
+            const matchedMeta = itemDictionary[rawName.toLowerCase()];
+            if (!matchedMeta) return alert(`Could not find that item. Verify spelling rules match the OSRS Wiki.`);
 
             if (category === "slayer") {
-                userDatabase.slayerLoot.push({ id: matchedId, name: rawName });
+                userDatabase.slayerLoot.push({ id: matchedMeta.id, name: rawName });
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
                 const qtyVal = parseInt(document.getElementById("input-qty").value);
                 if (isNaN(entryVal) || isNaN(qtyVal)) return alert("Fill entry parameters cleanly.");
 
                 userDatabase.investments.push({ 
-                    id: matchedId, name: rawName, qty: qtyVal, entryCost: entryVal, exitTarget: Math.round(entryVal * 1.12) 
+                    id: matchedMeta.id, name: rawName, qty: qtyVal, entryCost: entryVal, exitTarget: Math.round(entryVal * 1.12) 
                 });
             }
             saveToLocalStorage();
