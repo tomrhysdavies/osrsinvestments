@@ -166,10 +166,10 @@
                     </div>
                     <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-300 mb-2">Restore Factory Layout</h3>
-                            <p class="text-xs text-gray-400">Wipe custom overrides and restore the full 46 blueprint master seed configuration.</p>
+                            <h3 class="text-sm font-semibold text-gray-300 mb-2">Wipe & Restore Blueprint</h3>
+                            <p class="text-xs text-gray-400">Wipe all local lists and cache records back to default factory code settings (WARNING: Clears active investments).</p>
                         </div>
-                        <button onclick="loadDefaultDataset()" class="border border-gray-700 hover:bg-gray-800 text-gray-300 py-2 rounded text-xs mt-4">Reset to Default List</button>
+                        <button onclick="loadDefaultDataset()" class="border border-gray-700 hover:bg-rose-950 text-rose-400 py-2 rounded text-xs mt-4">Reset App Database</button>
                     </div>
                 </div>
             </section>
@@ -221,73 +221,65 @@
     </div>
 
     <script>
-        // COMBINATION BLUEPRINT SEED: Preloads 46 top core economic assets out of the box
-        const INITIAL_SEED = {
-            slayerLoot: [
-                // 🛠️ Gathering / Supplies
-                { id: 451, name: "Runite Ore", group: "gathering" },
-                { id: 453, name: "Coal", group: "gathering" },
-                { id: 440, name: "Iron Ore", group: "gathering" },
-                { id: 2363, name: "Runite Bar", group: "gathering" },
-                { id: 2361, name: "Adamantite Bar", group: "gathering" },
-                { id: 1515, name: "Yew Logs", group: "gathering" },
-                { id: 1513, name: "Magic Logs", group: "gathering" },
-                { id: 8782, name: "Mahogany Plank", group: "gathering" },
-                { id: 561, name: "Nature Rune", group: "gathering" },
-                { id: 560, name: "Death Rune", group: "gathering" },
-                { id: 565, name: "Blood Rune", group: "gathering" },
-                { id: 566, name: "Soul Rune", group: "gathering" },
-                { id: 21880, name: "Wrath Rune", group: "gathering" },
-                { id: 9144, name: "Runite Bolt", group: "gathering" },
-                { id: 11212, name: "Dragon Arrow", group: "gathering" },
+        const MASTER_BLUEPRINT_LIST = [
+            // 🛠️ Gathering / Supplies
+            { id: 451, name: "Runite Ore", group: "gathering" },
+            { id: 453, name: "Coal", group: "gathering" },
+            { id: 440, name: "Iron Ore", group: "gathering" },
+            { id: 2363, name: "Runite Bar", group: "gathering" },
+            { id: 2361, name: "Adamantite Bar", group: "gathering" },
+            { id: 1515, name: "Yew Logs", group: "gathering" },
+            { id: 1513, name: "Magic Logs", group: "gathering" },
+            { id: 8782, name: "Mahogany Plank", group: "gathering" },
+            { id: 561, name: "Nature Rune", group: "gathering" },
+            { id: 560, name: "Death Rune", group: "gathering" },
+            { id: 565, name: "Blood Rune", group: "gathering" },
+            { id: 566, name: "Soul Rune", group: "gathering" },
+            { id: 21880, name: "Wrath Rune", group: "gathering" },
+            { id: 9144, name: "Runite Bolt", group: "gathering" },
+            { id: 11212, name: "Dragon Arrow", group: "gathering" },
 
-                // ☠️ Combat / Drops
-                { id: 536, name: "Dragon Bones", group: "combat" },
-                { id: 11943, name: "Lava Dragon Bones", group: "combat" },
-                { id: 22124, name: "Superior Dragon Bones", group: "combat" },
-                { id: 1753, name: "Green Dragonhide", group: "combat" },
-                { id: 1751, name: "Blue Dragonhide", group: "combat" },
-                { id: 1749, name: "Red Dragonhide", group: "combat" },
-                { id: 1747, name: "Black Dragonhide", group: "combat" },
-                { id: 1615, name: "Dragonstone", group: "combat" },
-                { id: 1617, name: "Uncut Diamond", group: "combat" },
-                { id: 1619, name: "Uncut Ruby", group: "combat" },
-                { id: 11335, name: "Dragon Med Helm", group: "combat" },
-                { id: 4087, name: "Dragon Platelegs", group: "combat" },
-                { id: 12934, name: "Zulrah's Scales", group: "combat" },
-                { id: 21975, name: "Vorkath's Head", group: "combat" },
+            // ☠️ Combat / Drops
+            { id: 536, name: "Dragon Bones", group: "combat" },
+            { id: 11943, name: "Lava Dragon Bones", group: "combat" },
+            { id: 22124, name: "Superior Dragon Bones", group: "combat" },
+            { id: 1753, name: "Green Dragonhide", group: "combat" },
+            { id: 1751, name: "Blue Dragonhide", group: "combat" },
+            { id: 1749, name: "Red Dragonhide", group: "combat" },
+            { id: 1747, name: "Black Dragonhide", group: "combat" },
+            { id: 1615, name: "Dragonstone", group: "combat" },
+            { id: 1617, name: "Uncut Diamond", group: "combat" },
+            { id: 1619, name: "Uncut Ruby", group: "combat" },
+            { id: 11335, name: "Dragon Med Helm", group: "combat" },
+            { id: 4087, name: "Dragon Platelegs", group: "combat" },
+            { id: 12934, name: "Zulrah's Scales", group: "combat" },
+            { id: 21975, name: "Vorkath's Head", group: "combat" },
 
-                // 🧪 Herbs / Potions
-                { id: 207, name: "Grimy Ranarr Weed", group: "herbs" },
-                { id: 211, name: "Grimy Avantoe", group: "herbs" },
-                { id: 213, name: "Grimy Kwuarm", group: "herbs" },
-                { id: 215, name: "Grimy Cadantine", group: "herbs" },
-                { id: 217, name: "Grimy Dwarf Weed", group: "herbs" },
-                { id: 2485, name: "Grimy Lantadyme", group: "herbs" },
-                { id: 3049, name: "Grimy Toadflax", group: "herbs" },
-                { id: 3051, name: "Grimy Snapdragon", group: "herbs" },
-                { id: 2440, name: "Super Strength(4)", group: "herbs" },
-                { id: 2442, name: "Super Attack(4)", group: "herbs" },
-                { id: 2444, name: "Ranging Potion(4)", group: "herbs" },
-                { id: 3024, name: "Super Restore(4)", group: "herbs" },
-                { id: 6685, name: "Saradomin Brew(4)", group: "herbs" },
-                { id: 12695, name: "Super Combat Potion(4)", group: "herbs" },
-                { id: 22647, name: "Bastion Potion(4)", group: "herbs" },
-                { id: 12625, name: "Stamina Potion(4)", group: "herbs" }
-            ],
-            investments: [
-                { id: 26219, name: "Osmumten's Fang", qty: 1, entryCost: 18500000, exitTarget: 22000000 },
-                { id: 25865, name: "Bow of Faerdhinen (Inactive)", qty: 1, entryCost: 92000000, exitTarget: 105000000 }
-            ],
-            history: []
-        };
+            // 🧪 Herbs / Potions
+            { id: 207, name: "Grimy Ranarr Weed", group: "herbs" },
+            { id: 211, name: "Grimy Avantoe", group: "herbs" },
+            { id: 213, name: "Grimy Kwuarm", group: "herbs" },
+            { id: 215, name: "Grimy Cadantine", group: "herbs" },
+            { id: 217, name: "Grimy Dwarf Weed", group: "herbs" },
+            { id: 2485, name: "Grimy Lantadyme", group: "herbs" },
+            { id: 3049, name: "Grimy Toadflax", group: "herbs" },
+            { id: 3051, name: "Grimy Snapdragon", group: "herbs" },
+            { id: 2440, name: "Super Strength(4)", group: "herbs" },
+            { id: 2442, name: "Super Attack(4)", group: "herbs" },
+            { id: 2444, name: "Ranging Potion(4)", group: "herbs" },
+            { id: 3024, name: "Super Restore(4)", group: "herbs" },
+            { id: 6685, name: "Saradomin Brew(4)", group: "herbs" },
+            { id: 12695, name: "Super Combat Potion(4)", group: "herbs" },
+            { id: 22647, name: "Bastion Potion(4)", group: "herbs" },
+            { id: 12625, name: "Stamina Potion(4)", group: "herbs" }
+        ];
 
         let userDatabase = { slayerLoot: [], investments: [], history: [] };
         let itemDictionary = null; 
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
         let currentPriceFilter = "all"; 
-        let activeSubTab = "gathering"; // Default selected view tab sector
+        let activeSubTab = "gathering"; 
 
         function calculateGETax(price) {
             const rawTax = Math.floor(price * 0.02);
@@ -299,8 +291,22 @@
             if (localData) {
                 userDatabase = JSON.parse(localData);
                 if (!userDatabase.history) userDatabase.history = [];
+                
+                // MIGRATION SHIELD: If your current cache has 4 or fewer high volume entries, automatically 
+                // inject the new 46-item blueprint layout without touching your investments or history ledger.
+                if (!userDatabase.slayerLoot || userDatabase.slayerLoot.length <= 4) {
+                    userDatabase.slayerLoot = [...MASTER_BLUEPRINT_LIST];
+                    saveToLocalStorage();
+                }
             } else {
-                userDatabase = INITIAL_SEED;
+                userDatabase = {
+                    slayerLoot: [...MASTER_BLUEPRINT_LIST],
+                    investments: [
+                        { id: 26219, name: "Osmumten's Fang", qty: 1, entryCost: 18500000, exitTarget: 22000000 },
+                        { id: 25865, name: "Bow of Faerdhinen (Inactive)", qty: 1, entryCost: 92000000, exitTarget: 105000000 }
+                    ],
+                    history: []
+                };
                 saveToLocalStorage();
             }
             
@@ -330,7 +336,6 @@
             if (tab === "history") renderHistoryLedger();
         }
 
-        // CONTROL NAVIGATOR: Controls rendering filter parameters for sub-tab elements inside high volume block
         function switchSubTab(targetTab) {
             activeSubTab = targetTab;
             const subtabs = ["gathering", "combat", "herbs", "custom"];
@@ -342,7 +347,7 @@
                     el.className = "px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200";
                 }
             });
-            fetchLivePrices(); // Re-render lists smoothly
+            fetchLivePrices(); 
         }
 
         function setPriceFilter(mode) {
@@ -415,9 +420,8 @@
                 if (currentTimeframe === 30) { timestep = "6h"; recordsToSlice = -120; }
                 else if (currentTimeframe === 90) { timestep = "24h"; recordsToSlice = -90; }
 
-                // Filter down target loop arrays to match the actively chosen sub-navigation tab category sector
                 const activeSlayerCollection = userDatabase.slayerLoot.filter(i => {
-                    if (activeSubTab === "custom") return !i.group; // Manually added fields fall here
+                    if (activeSubTab === "custom") return !i.group; 
                     return i.group === activeSubTab;
                 });
 
@@ -452,7 +456,6 @@
             } catch (err) { console.error(err); }
         }
 
-        // HEATMAP MATRIX: Renders data grids featuring dynamic visual row background alert tinting styles
         function renderSlayerTable(prices, history, targetedItems) {
             const target = document.getElementById("slayer-loot-rows"); target.innerHTML = "";
             
@@ -473,23 +476,22 @@
 
                 let stateLabel = "NEUTRAL"; 
                 let badgeStyle = "bg-gray-700 text-gray-300 border-gray-600";
-                let rowColorStyle = "bg-transparent"; // Base neutral style
+                let rowColorStyle = "bg-transparent"; 
 
                 if (priceIsAtCeiling && volumeIsSpiking) {
                     stateLabel = "⚡ BREAKOUT (HOLD)"; 
                     badgeStyle = "bg-cyan-950 text-cyan-400 border-cyan-600 animate-pulse";
-                    rowColorStyle = "bg-cyan-950/20 border-l-2 border-cyan-500"; // Cyan Glow
+                    rowColorStyle = "bg-cyan-950/20 border-l-2 border-cyan-500"; 
                 } else if (positionPct <= 30) {
                     stateLabel = "HOLD & WAIT"; 
                     badgeStyle = "bg-amber-950 text-amber-400 border-amber-800";
-                    rowColorStyle = "bg-amber-950/10"; // Amber Row
+                    rowColorStyle = "bg-amber-950/10"; 
                 } else if (positionPct >= 70) {
                     stateLabel = "STRONG SELL"; 
                     badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
-                    rowColorStyle = "bg-emerald-950/20 border-l-2 border-emerald-500"; // Green Action Row
+                    rowColorStyle = "bg-emerald-950/20 border-l-2 border-emerald-500"; 
                 }
 
-                // Global delete tracking pointer calculation index matching parent configurations
                 const globalIndex = userDatabase.slayerLoot.findIndex(i => i.id === item.id);
 
                 target.innerHTML += `
@@ -542,7 +544,8 @@
         }
 
         function renderFlippingRadar(prices) {
-            const target = document.getElementById("flipping-radar-rows"); target.innerHTML = "";
+            const target = document.getElementById("flipping-radar-rows"); 
+            target.innerHTML = "";
 
             if (!prices || !itemDictionary) return;
             const candidates = [];
@@ -657,9 +660,8 @@
             if (!matchedMeta) return alert(`Could not find that item name layout.`);
 
             if (category === "slayer") {
-                // If added manually via form console, it leaves group undefined so it routes into the Custom Watchlist subtab
                 userDatabase.slayerLoot.push({ id: matchedMeta.id, name: matchedMeta.name });
-                activeSubTab = "custom"; // Automatically shift view tab to Custom to show your selection
+                activeSubTab = "custom"; 
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
                 const qtyVal = parseInt(document.getElementById("input-qty").value);
@@ -687,9 +689,13 @@
         }
 
         function loadDefaultDataset() {
-            if (confirm("Reset tracking lists back to factory pre-seeded blueprint configuration?")) {
+            if (confirm("Reset tracking lists back to default blueprint settings? WARNING: This action will completely erase your active long term investments ledger data positions!")) {
                 localStorage.removeItem("osrs_dashboard_db");
-                userDatabase = JSON.parse(JSON.stringify(INITIAL_SEED));
+                userDatabase = {
+                    slayerLoot: [...MASTER_BLUEPRINT_LIST],
+                    investments: [],
+                    history: []
+                };
                 saveToLocalStorage(); 
                 activeSubTab = "gathering";
                 fetchLivePrices(); switchView('live');
