@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSRS GE Market Watch</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; }
@@ -15,6 +16,7 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
+        <!-- App Header -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-4 mb-6 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">
@@ -33,6 +35,7 @@
             </div>
         </header>
 
+        <!-- VIEW PANEL 1: LIVE MARKET MONITOR -->
         <div id="panel-live" class="space-y-8">
             <div class="flex justify-end items-center gap-3">
                 <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
@@ -43,6 +46,7 @@
                 </button>
             </div>
 
+            <!-- SECTION 1: HIGH VOLUME ITEMS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-gray-700 pb-4">
                     <div>
@@ -51,17 +55,20 @@
                     </div>
                     
                     <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-700 self-end lg:self-auto">
-                        <button id="btn-7d" onclick="setTimeframe(7)" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900">7D Window</button>
-                        <button id="btn-30d" onclick="setTimeframe(30)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">30D Window</button>
-                        <button id="btn-90d" onclick="setTimeframe(90)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">90D Window</button>
+                        <button id="btn-7d" onclick="setTimeframe(7)" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900">7D</button>
+                        <button id="btn-30d" onclick="setTimeframe(30)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">30D</button>
+                        <button id="btn-90d" onclick="setTimeframe(90)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">90D</button>
                     </div>
                 </div>
 
+                <!-- SUB-CATEGORY TABS -->
                 <div class="flex flex-wrap gap-2 mb-4 border-b border-gray-700/40 pb-3">
-                    <button id="subtab-gathering" onclick="switchSubTab('gathering')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700">⛏️ Gathering & Supplies</button>
-                    <button id="subtab-combat" onclick="switchSubTab('combat')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">☠️ Combat & Drops</button>
-                    <button id="subtab-herbs" onclick="switchSubTab('herbs')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">🧪 Herbs & Potions</button>
-                    <button id="subtab-custom" onclick="switchSubTab('custom')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">⭐ Custom Watchlist</button>
+                    <button id="subtab-gathering" onclick="switchSubTab('gathering')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700">⛏️ Gathering</button>
+                    <button id="subtab-combat" onclick="switchSubTab('combat')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">☠️ Combat</button>
+                    <button id="subtab-herbs" onclick="switchSubTab('herbs')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">🧪 Herbs</button>
+                    <button id="subtab-alchables" onclick="switchSubTab('alchables')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">💰 Alchables</button>
+                    <button id="subtab-ammo" onclick="switchSubTab('ammo')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">🏹 Ammo</button>
+                    <button id="subtab-custom" onclick="switchSubTab('custom')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">⭐ Custom</button>
                 </div>
                 
                 <div class="w-full">
@@ -69,10 +76,10 @@
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                                 <th class="pb-3 pl-2">Item Name</th>
-                                <th class="pb-3 text-right" id="lbl-low-heading">7-Day Historical Low</th>
-                                <th class="pb-3 text-right" id="lbl-high-heading">7-Day Historical High</th>
-                                <th class="pb-3 text-right">Today's Price</th>
-                                <th class="pb-3 text-center">Is Now A Good Time To Sell?</th>
+                                <th class="pb-3 text-right" id="lbl-low-heading">7D Low</th>
+                                <th class="pb-3 text-right" id="lbl-high-heading">7D High</th>
+                                <th class="pb-3 text-right">Price</th>
+                                <th class="pb-3 text-center">Status</th>
                                 <th class="pb-3 text-center">Actions</th>
                             </tr>
                         </thead>
@@ -81,23 +88,20 @@
                 </div>
             </section>
 
+            <!-- SECTION 2: LONG TERM INVESTMENTS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <div class="mb-4">
-                    <h2 class="text-xl font-bold text-cyan-400">Long Term Investments (Boss / Rare Drops)</h2>
-                    <p class="text-xs text-gray-400">Tracks margins, quantities, and net profit values factoring in the 2% GE Tax (5M Cap).</p>
-                </div>
+                <h2 class="text-xl font-bold text-cyan-400 mb-4">Long Term Investments</h2>
                 <div class="w-full">
                     <table class="w-full text-left border-collapse table-auto">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                                <th class="pb-3">Unique Item Name</th>
+                                <th class="pb-3">Unique Item</th>
                                 <th class="pb-3 text-right">Qty</th>
-                                <th class="pb-3 text-right">Your Buy Price</th>
-                                <th class="pb-3 text-right">Target Exit (+12%)</th>
-                                <th class="pb-3 text-right">Live Price (Mid)</th>
-                                <th class="pb-3 text-right">Total Net Profit</th>
-                                <th class="pb-3 text-right">Net ROI %</th>
-                                <th class="pb-3 text-center">Position Status</th>
+                                <th class="pb-3 text-right">Entry</th>
+                                <th class="pb-3 text-right">Exit Target</th>
+                                <th class="pb-3 text-right">Live</th>
+                                <th class="pb-3 text-right">Net Profit</th>
+                                <th class="pb-3 text-right">ROI %</th>
                                 <th class="pb-3 text-center">Actions</th>
                             </tr>
                         </thead>
@@ -106,15 +110,13 @@
                 </div>
             </section>
 
+            <!-- SECTION 3: AUTOMATED REAL-TIME GLOBAL SCANNER -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-emerald-400">⚡ Global High-Yield Flipping Radar (Top 10 Smoothed Slots)</h2>
-                        <p class="text-xs text-gray-400">Ranks opportunities based on maximum potential profit per 4-hour slot capacity cap.</p>
-                    </div>
+                    <h2 class="text-xl font-bold text-emerald-400">⚡ Global High-Yield Flipping Radar</h2>
                     <div class="bg-gray-950 p-1 rounded-lg border border-gray-700 flex items-center">
-                        <button id="filter-all" onclick="setPriceFilter('all')" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all">All Items</button>
-                        <button id="filter-premium" onclick="setPriceFilter('premium')" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all flex items-center gap-1.5">👑 High-Tier Only (1M+)</button>
+                        <button id="filter-all" onclick="setPriceFilter('all')" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all">All</button>
+                        <button id="filter-premium" onclick="setPriceFilter('premium')" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all">👑 High-Tier Only</button>
                     </div>
                 </div>
                 <div class="w-full">
@@ -122,12 +124,11 @@
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                                 <th class="pb-3">Item Name</th>
-                                <th class="pb-3 text-right">Avg Buy Price (Low)</th>
-                                <th class="pb-3 text-right">Avg Sell Price (High)</th>
-                                <th class="pb-3 text-right">Net Profit / Unit</th>
+                                <th class="pb-3 text-right">Buy</th>
+                                <th class="pb-3 text-right">Sell</th>
+                                <th class="pb-3 text-right">Profit/U</th>
                                 <th class="pb-3 text-center">4H Limit</th>
-                                <th class="pb-3 text-right text-cyan-400">Max Slot Profit (4H)</th>
-                                <th class="pb-3 text-right text-gray-400">Total Buy-In Capital</th>
+                                <th class="pb-3 text-right text-cyan-400">Max Yield</th>
                             </tr>
                         </thead>
                         <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
@@ -135,143 +136,72 @@
                 </div>
             </section>
 
+            <!-- SECTION 4: ADD ITEMS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <h2 class="text-lg font-bold text-gray-200 mb-4 flex items-center gap-2">🛠️ Add Items to Watchlist</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-2 bg-gray-900/50 p-4 rounded-lg border border-gray-700 space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Item Name</label>
-                                <input type="text" id="input-name" placeholder="e.g., Runite ore" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Category Target</label>
-                                <select id="input-category" onchange="toggleFormFields()" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
-                                    <option value="slayer">High Volume (Custom Watchlist Tab)</option>
-                                    <option value="investment">Long Term Investments</option>
-                                </select>
-                            </div>
+                <h2 class="text-lg font-bold text-gray-200 mb-4">🛠️ Add Items</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 space-y-4">
+                        <div class="grid grid-cols-1 gap-4">
+                            <input type="text" id="input-name" placeholder="Item name..." class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
+                            <select id="input-category" onchange="toggleFormFields()" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
+                                <option value="slayer">Add to High Volume</option>
+                                <option value="investment">Add to Investments</option>
+                            </select>
                         </div>
-                        <div id="fields-investment" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">What did you buy it for? (GP per item)</label>
-                                <input type="number" id="input-entry" placeholder="e.g., 18500000" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Quantity Owned</label>
-                                <input type="number" id="input-qty" placeholder="e.g., 91" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
-                            </div>
+                        <div id="fields-investment" class="hidden grid grid-cols-1 gap-4">
+                            <input type="number" id="input-entry" placeholder="Buy Price" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
+                            <input type="number" id="input-qty" placeholder="Quantity" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
                         </div>
-                        <button onclick="handleAddAsset()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold py-2 rounded text-sm transition-colors">➕ Add to Watchlist</button>
+                        <button onclick="handleAddAsset()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold py-2 rounded text-sm">Add Item</button>
                     </div>
-                    <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-300 mb-2">Wipe & Restore Blueprint</h3>
-                            <p class="text-xs text-gray-400">Wipe all local lists and cache records back to default factory code settings (WARNING: Clears active investments).</p>
-                        </div>
-                        <button onclick="loadDefaultDataset()" class="border border-gray-700 hover:bg-rose-950 text-rose-400 py-2 rounded text-xs mt-4">Reset App Database</button>
-                    </div>
+                    <button onclick="loadDefaultDataset()" class="border border-gray-700 hover:bg-rose-950 text-rose-400 rounded text-sm">Reset Database</button>
                 </div>
             </section>
         </div>
 
+        <!-- PANEL 2: HISTORY -->
         <div id="panel-history" class="hidden space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 shadow-md">
-                    <span class="text-xs text-gray-400 uppercase tracking-wider block">Total Items Merchandised</span>
-                    <span id="stat-total-qty" class="text-3xl font-black text-cyan-400 mt-1 block">0</span>
-                </div>
-                <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 shadow-md">
-                    <span class="text-xs text-gray-400 uppercase tracking-wider block">Total Realized Wealth (Net Profit)</span>
-                    <span id="stat-total-profit" class="text-3xl font-black text-emerald-400 mt-1 block">0 GP</span>
-                </div>
-                <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 shadow-md">
-                    <span class="text-xs text-gray-400 uppercase tracking-wider block">Average Campaign ROI</span>
-                    <span id="stat-avg-roi" class="text-3xl font-black text-amber-500 mt-1 block">0.0%</span>
-                </div>
-            </div>
-
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <div class="mb-4 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-200">Historical Archives</h2>
-                        <p class="text-xs text-gray-400">Immutable ledger tracking your closed capital runs.</p>
-                    </div>
-                    <button onclick="wipeTradeHistory()" class="text-xs border border-rose-900 text-rose-400 hover:bg-rose-950/30 px-3 py-1 rounded transition-colors">⚠️ Wipe Archive History</button>
-                </div>
-                <div class="w-full">
-                    <table class="w-full text-left border-collapse table-auto">
-                        <thead>
-                            <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                                <th class="pb-3">Item Name</th>
-                                <th class="pb-3 text-right">Quantity</th>
-                                <th class="pb-3 text-right">Buy Cost (Unit)</th>
-                                <th class="pb-3 text-right">Realized Sale (Unit)</th>
-                                <th class="pb-3 text-right">Net Profit Generated</th>
-                                <th class="pb-3 text-right">Final ROI</th>
-                                <th class="pb-3 text-center">Closing Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-ledger-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
-                    </table>
-                </div>
+                <button onclick="wipeTradeHistory()" class="text-xs border border-rose-900 text-rose-400 mb-4 px-3 py-1 rounded">Wipe History</button>
+                <table class="w-full text-left border-collapse table-auto">
+                    <thead>
+                        <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
+                            <th class="pb-3">Item</th>
+                            <th class="pb-3 text-right">Profit</th>
+                            <th class="pb-3 text-right">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-ledger-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
+                </table>
             </section>
         </div>
-
     </div>
 
     <script>
         const MASTER_BLUEPRINT_LIST = [
-            // 🛠️ Gathering / Supplies
-            { id: 451, name: "Runite Ore", group: "gathering" },
-            { id: 453, name: "Coal", group: "gathering" },
-            { id: 440, name: "Iron Ore", group: "gathering" },
-            { id: 2363, name: "Runite Bar", group: "gathering" },
-            { id: 2361, name: "Adamantite Bar", group: "gathering" },
-            { id: 1515, name: "Yew Logs", group: "gathering" },
-            { id: 1513, name: "Magic Logs", group: "gathering" },
-            { id: 8782, name: "Mahogany Plank", group: "gathering" },
-            { id: 561, name: "Nature Rune", group: "gathering" },
-            { id: 560, name: "Death Rune", group: "gathering" },
-            { id: 565, name: "Blood Rune", group: "gathering" },
-            { id: 566, name: "Soul Rune", group: "gathering" },
-            { id: 21880, name: "Wrath Rune", group: "gathering" },
-            { id: 9144, name: "Runite Bolt", group: "gathering" },
-            { id: 11212, name: "Dragon Arrow", group: "gathering" },
-
-            // ☠️ Combat / Drops
-            { id: 536, name: "Dragon Bones", group: "combat" },
-            { id: 11943, name: "Lava Dragon Bones", group: "combat" },
-            { id: 22124, name: "Superior Dragon Bones", group: "combat" },
-            { id: 1753, name: "Green Dragonhide", group: "combat" },
-            { id: 1751, name: "Blue Dragonhide", group: "combat" },
-            { id: 1749, name: "Red Dragonhide", group: "combat" },
-            { id: 1747, name: "Black Dragonhide", group: "combat" },
-            { id: 1615, name: "Dragonstone", group: "combat" },
-            { id: 1617, name: "Uncut Diamond", group: "combat" },
-            { id: 1619, name: "Uncut Ruby", group: "combat" },
-            { id: 11335, name: "Dragon Med Helm", group: "combat" },
-            { id: 4087, name: "Dragon Platelegs", group: "combat" },
-            { id: 12934, name: "Zulrah's Scales", group: "combat" },
-            { id: 21975, name: "Vorkath's Head", group: "combat" },
-
-            // 🧪 Herbs / Potions
-            { id: 207, name: "Grimy Ranarr Weed", group: "herbs" },
-            { id: 211, name: "Grimy Avantoe", group: "herbs" },
-            { id: 213, name: "Grimy Kwuarm", group: "herbs" },
-            { id: 215, name: "Grimy Cadantine", group: "herbs" },
-            { id: 217, name: "Grimy Dwarf Weed", group: "herbs" },
-            { id: 2485, name: "Grimy Lantadyme", group: "herbs" },
-            { id: 3049, name: "Grimy Toadflax", group: "herbs" },
-            { id: 3051, name: "Grimy Snapdragon", group: "herbs" },
-            { id: 2440, name: "Super Strength(4)", group: "herbs" },
-            { id: 2442, name: "Super Attack(4)", group: "herbs" },
-            { id: 2444, name: "Ranging Potion(4)", group: "herbs" },
-            { id: 3024, name: "Super Restore(4)", group: "herbs" },
-            { id: 6685, name: "Saradomin Brew(4)", group: "herbs" },
-            { id: 12695, name: "Super Combat Potion(4)", group: "herbs" },
-            { id: 22647, name: "Bastion Potion(4)", group: "herbs" },
-            { id: 12625, name: "Stamina Potion(4)", group: "herbs" }
+            { id: 451, name: "Runite Ore", group: "gathering" }, { id: 453, name: "Coal", group: "gathering" },
+            { id: 440, name: "Iron Ore", group: "gathering" }, { id: 2363, name: "Runite Bar", group: "gathering" },
+            { id: 2361, name: "Adamantite Bar", group: "gathering" }, { id: 1515, name: "Yew Logs", group: "gathering" },
+            { id: 1513, name: "Magic Logs", group: "gathering" }, { id: 8782, name: "Mahogany Plank", group: "gathering" },
+            { id: 561, name: "Nature Rune", group: "gathering" }, { id: 560, name: "Death Rune", group: "gathering" },
+            { id: 565, name: "Blood Rune", group: "gathering" }, { id: 566, name: "Soul Rune", group: "gathering" },
+            { id: 21880, name: "Wrath Rune", group: "gathering" }, { id: 9144, name: "Runite Bolt", group: "gathering" },
+            { id: 11212, name: "Dragon Arrow", group: "gathering" }, { id: 536, name: "Dragon Bones", group: "combat" },
+            { id: 11943, name: "Lava Dragon Bones", group: "combat" }, { id: 22124, name: "Superior Dragon Bones", group: "combat" },
+            { id: 6729, name: "Dagannoth Bones", group: "combat" }, { id: 22786, name: "Hydra Bones", group: "combat" },
+            { id: 1747, name: "Black Dragonhide", group: "combat" }, { id: 1749, name: "Red Dragonhide", group: "combat" },
+            { id: 1751, name: "Blue Dragonhide", group: "combat" }, { id: 1753, name: "Green Dragonhide", group: "combat" },
+            { id: 1615, name: "Dragonstone", group: "combat" }, { id: 1631, name: "Uncut Dragonstone", group: "combat" },
+            { id: 1617, name: "Uncut Diamond", group: "combat" }, { id: 1619, name: "Uncut Ruby", group: "combat" },
+            { id: 1621, name: "Uncut Emerald", group: "combat" }, { id: 1623, name: "Uncut Sapphire", group: "combat" },
+            { id: 1127, name: "Rune Platebody", group: "alchables" }, { id: 1079, name: "Rune Platelegs", group: "alchables" },
+            { id: 4585, name: "Dragon Plateskirt", group: "alchables" }, { id: 4087, name: "Dragon Platelegs", group: "alchables" },
+            { id: 1319, name: "Rune 2h Sword", group: "alchables" }, { id: 1333, name: "Rune Scimitar", group: "alchables" },
+            { id: 1305, name: "Dragon Longsword", group: "alchables" }, { id: 4587, name: "Dragon Scimitar", group: "alchables" },
+            { id: 1377, name: "Dragon Battleaxe", group: "alchables" }, { id: 21944, name: "Onyx Bolts (e)", group: "ammo" },
+            { id: 9144, name: "Runite bolts", group: "ammo" }, { id: 892, name: "Rune Arrow", group: "ammo" },
+            { id: 21946, name: "Diamond bolts (e)", group: "ammo" }, { id: 11237, name: "Dragon dart tip", group: "ammo" },
+            { id: 2440, name: "Super Strength(4)", group: "herbs" }, { id: 12695, name: "Super Combat Potion(4)", group: "herbs" }
         ];
 
         let userDatabase = { slayerLoot: [], investments: [], history: [] };
@@ -281,429 +211,118 @@
         let currentPriceFilter = "all"; 
         let activeSubTab = "gathering"; 
 
-        function calculateGETax(price) {
-            const rawTax = Math.floor(price * 0.02);
-            return Math.min(rawTax, 5000000);
-        }
+        function calculateGETax(price) { return Math.min(Math.floor(price * 0.02), 5000000); }
 
         async function initApp() {
-    const localData = localStorage.getItem("osrs_dashboard_db");
-    
-    // 1. Load existing database or initialize default
-    if (localData) {
-        userDatabase = JSON.parse(localData);
-        if (!userDatabase.history) userDatabase.history = [];
-        if (!userDatabase.slayerLoot) userDatabase.slayerLoot = [];
-    } else {
-        userDatabase = {
-            slayerLoot: [...MASTER_BLUEPRINT_LIST],
-            investments: [],
-            history: []
-        };
-    }
-
-    // 2. FORCE-MERGE: Ensure the 46 blueprint items exist in your list.
-    // If an item from the blueprint is missing from your list, append it.
-    MASTER_BLUEPRINT_LIST.forEach(blueprintItem => {
-        const exists = userDatabase.slayerLoot.find(i => i.id === blueprintItem.id);
-        if (!exists) {
-            userDatabase.slayerLoot.push(blueprintItem);
-        }
-    });
-
-    saveToLocalStorage();
-    await fetchItemDictionary();
-    await fetchLivePrices();
-}
-
-        function saveToLocalStorage() {
-            localStorage.setItem("osrs_dashboard_db", JSON.stringify(userDatabase));
+            const localData = localStorage.getItem("osrs_dashboard_db");
+            userDatabase = localData ? JSON.parse(localData) : { slayerLoot: [], investments: [], history: [] };
+            
+            MASTER_BLUEPRINT_LIST.forEach(b => {
+                if (!userDatabase.slayerLoot.find(i => i.id === b.id)) userDatabase.slayerLoot.push(b);
+            });
+            
+            saveToLocalStorage();
+            await fetchItemDictionary();
+            await fetchLivePrices();
         }
 
-        function toggleFormFields() {
-            const category = document.getElementById("input-category").value;
-            document.getElementById("fields-investment").classList.toggle("hidden", category !== "investment");
-        }
-
+        function saveToLocalStorage() { localStorage.setItem("osrs_dashboard_db", JSON.stringify(userDatabase)); }
+        function toggleFormFields() { document.getElementById("fields-investment").classList.toggle("hidden", document.getElementById("input-category").value !== "investment"); }
         function switchView(tab) {
             document.getElementById("panel-live").classList.toggle("hidden", tab !== "live");
             document.getElementById("panel-history").classList.toggle("hidden", tab !== "history");
-
-            const activeClass = "bg-amber-600 text-gray-900 px-4 py-2 text-xs font-bold rounded transition-colors";
-            const inactiveClass = "text-gray-400 hover:text-gray-200 px-4 py-2 text-xs font-bold rounded transition-colors";
-
-            document.getElementById("tab-live").className = (tab === "live") ? activeClass : inactiveClass;
-            document.getElementById("tab-history").className = (tab === "history") ? activeClass : inactiveClass;
-
-            if (tab === "history") renderHistoryLedger();
+            document.getElementById("tab-live").className = (tab === "live") ? "px-4 py-2 text-xs font-bold rounded bg-amber-600 text-gray-900" : "px-4 py-2 text-xs font-bold rounded text-gray-400";
+            document.getElementById("tab-history").className = (tab === "history") ? "px-4 py-2 text-xs font-bold rounded bg-amber-600 text-gray-900" : "px-4 py-2 text-xs font-bold rounded text-gray-400";
         }
-
-        function switchSubTab(targetTab) {
-            activeSubTab = targetTab;
-            const subtabs = ["gathering", "combat", "herbs", "custom"];
-            subtabs.forEach(t => {
-                const el = document.getElementById(`subtab-${t}`);
-                if (t === targetTab) {
-                    el.className = "px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700";
-                } else {
-                    el.className = "px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200";
-                }
+        function switchSubTab(t) {
+            activeSubTab = t;
+            ["gathering","combat","herbs","alchables","ammo","custom"].forEach(sub => {
+                document.getElementById(`subtab-${sub}`).className = (sub === t) ? "px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700" : "px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200";
             });
-            fetchLivePrices(); 
-        }
-
-        function setPriceFilter(mode) {
-            currentPriceFilter = mode;
-            const btnAll = document.getElementById("filter-all");
-            const btnPremium = document.getElementById("filter-premium");
-
-            if (mode === "premium") {
-                btnPremium.className = "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all";
-                btnAll.className = "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all";
-            } else {
-                btnAll.className = "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all";
-                btnPremium.className = "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all";
-            }
-            renderFlippingRadar(rawLivePrices); 
-        }
-
-        function setTimeframe(days) {
-            currentTimeframe = days;
-            const btns = { 7: "btn-7d", 30: "btn-30d", 90: "btn-90d" };
-            Object.keys(btns).forEach(d => {
-                document.getElementById(btns[d]).className = (parseInt(d) === days)
-                    ? "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900"
-                    : "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200";
-            });
-            document.getElementById("lbl-low-heading").innerText = `${days}-Day Historical Low`;
-            document.getElementById("lbl-high-heading").innerText = `${days}-Day Historical High`;
             fetchLivePrices();
         }
+        function setPriceFilter(m) {
+            currentPriceFilter = m;
+            document.getElementById("filter-all").className = (m === 'all') ? "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all" : "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all";
+            document.getElementById("filter-premium").className = (m === 'premium') ? "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all" : "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all";
+            renderFlippingRadar(rawLivePrices);
+        }
+        function setTimeframe(d) { currentTimeframe = d; fetchLivePrices(); }
 
         async function fetchItemDictionary() {
-            try {
-                const response = await fetch("https://prices.runescape.wiki/api/v1/osrs/mapping", {
-                    headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
-                });
-                const mappingArray = await response.json();
-                itemDictionary = {};
-                mappingArray.forEach(item => { 
-                    itemDictionary[item.name.trim().toLowerCase()] = {
-                        id: item.id,
-                        name: item.name.trim(),
-                        limit: item.limit || 0
-                    }; 
-                });
-            } catch (err) { console.error(err); }
+            const res = await fetch("https://prices.runescape.wiki/api/v1/osrs/mapping", { headers: {'User-Agent': 'Market Tool'} });
+            const arr = await res.json();
+            itemDictionary = {};
+            arr.forEach(i => { itemDictionary[i.name.trim().toLowerCase()] = { id: i.id, name: i.name.trim(), limit: i.limit || 0 }; });
         }
 
         async function fetchLivePrices() {
-            const syncIndicator = document.getElementById("sync-indicator");
-            syncIndicator.innerText = "Analyzing Volumes & Prices...";
-            try {
-                const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/1h", {
-                    headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
-                });
-                const livePayload = await liveResponse.json();
-                rawLivePrices = livePayload.data; 
-
-                let radarPrices = null;
-                try {
-                    const radarResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/5m", {
-                        headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
-                    });
-                    if (radarResponse.ok) {
-                        const radarPayload = await radarResponse.json();
-                        radarPrices = radarPayload.data;
-                    }
-                } catch(e) { console.error(e); }
-
-                let timestep = "1h"; let recordsToSlice = -168; 
-                if (currentTimeframe === 30) { timestep = "6h"; recordsToSlice = -120; }
-                else if (currentTimeframe === 90) { timestep = "24h"; recordsToSlice = -90; }
-
-                const activeSlayerCollection = userDatabase.slayerLoot.filter(i => {
-                    if (activeSubTab === "custom") return !i.group; 
-                    return i.group === activeSubTab;
-                });
-
-                const historicalRecords = {};
-                for (const item of activeSlayerCollection) {
-                    try {
-                        const tsResponse = await fetch(`https://prices.runescape.wiki/api/v1/osrs/timeseries?id=${item.id}&timestep=${timestep}`, {
-                            headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
-                        });
-                        if (tsResponse.ok) {
-                            const tsPayload = await tsResponse.json();
-                            const slicedHistory = tsPayload.data.slice(recordsToSlice);
-                            const lows = slicedHistory.map(d => d.avgLowPrice).filter(p => p !== null && p > 0);
-                            const highs = slicedHistory.map(d => d.avgHighPrice).filter(p => p !== null && p > 0);
-                            const volumes = slicedHistory.map(d => d.lowPriceVolume + d.highPriceVolume).filter(v => v > 0);
-                            const totalVol = volumes.reduce((sum, v) => sum + v, 0);
-
-                            historicalRecords[item.id] = {
-                                min: lows.length ? Math.min(...lows) : null,
-                                max: highs.length ? Math.max(...highs) : null,
-                                avgVolume: volumes.length ? (totalVol / volumes.length) : 0,
-                                recentVolume: volumes.length ? volumes[volumes.length - 1] : 0
-                            };
-                        }
-                    } catch (e) { console.error(e); }
-                }
-                renderSlayerTable(rawLivePrices, historicalRecords, activeSlayerCollection);
-                renderInvestmentTable(rawLivePrices);
-                renderFlippingRadar(radarPrices || rawLivePrices); 
-                syncIndicator.innerText = `Synced: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-                syncIndicator.className = "text-xs bg-emerald-950 text-emerald-400 px-3 py-1.5 rounded-md border border-emerald-900";
-            } catch (err) { console.error(err); }
-        }
-
-        function renderSlayerTable(prices, history, targetedItems) {
-            const target = document.getElementById("slayer-loot-rows"); target.innerHTML = "";
+            const res = await fetch("https://prices.runescape.wiki/api/v1/osrs/1h", { headers: {'User-Agent': 'Market Tool'} });
+            rawLivePrices = (await res.json()).data;
+            const radarRes = await fetch("https://prices.runescape.wiki/api/v1/osrs/5m", { headers: {'User-Agent': 'Market Tool'} });
+            const radarPrices = (await radarRes.json()).data;
             
-            if(targetedItems.length === 0) {
-                target.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-gray-500">No assets logged under this tab section yet. Use the form tool panel down below to append targets.</td></tr>`;
-                return;
-            }
-
-            targetedItems.forEach((item) => {
-                const live = prices[item.id]; const hist = history[item.id];
-                let currentSell = live ? ((live.avgLowPrice > 0) ? live.avgLowPrice : (live.avgHighPrice || 0)) : 0;
-                const marketLow = hist && hist.min ? hist.min : Math.round(currentSell * 0.95);
-                const marketHigh = hist && hist.max ? hist.max : Math.round(currentSell * 1.05);
-                const positionPct = (marketHigh - marketLow) > 0 ? ((currentSell - marketLow) / (marketHigh - marketLow)) * 100 : 50;
-
-                const volumeIsSpiking = hist && hist.recentVolume > (hist.avgVolume * 1.5);
-                const priceIsAtCeiling = positionPct >= 85;
-
-                let stateLabel = "NEUTRAL"; 
-                let badgeStyle = "bg-gray-700 text-gray-300 border-gray-600";
-                let rowColorStyle = "bg-transparent"; 
-
-                if (priceIsAtCeiling && volumeIsSpiking) {
-                    stateLabel = "⚡ BREAKOUT (HOLD)"; 
-                    badgeStyle = "bg-cyan-950 text-cyan-400 border-cyan-600 animate-pulse";
-                    rowColorStyle = "bg-cyan-950/20 border-l-2 border-cyan-500"; 
-                } else if (positionPct <= 30) {
-                    stateLabel = "HOLD & WAIT"; 
-                    badgeStyle = "bg-amber-950 text-amber-400 border-amber-800";
-                    rowColorStyle = "bg-amber-950/10"; 
-                } else if (positionPct >= 70) {
-                    stateLabel = "STRONG SELL"; 
-                    badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
-                    rowColorStyle = "bg-emerald-950/20 border-l-2 border-emerald-500"; 
-                }
-
-                const globalIndex = userDatabase.slayerLoot.findIndex(i => i.id === item.id);
-
-                target.innerHTML += `
-                    <tr class="hover:bg-gray-700/20 transition-colors ${rowColorStyle}">
-                        <td class="py-3.5 pl-3 font-semibold text-gray-200">${item.name}</td>
-                        <td class="py-3.5 text-right font-mono text-gray-400">${marketLow.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono text-gray-400">${marketHigh.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono font-bold text-amber-500">${currentSell.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-center">
-                            <span class="text-xs font-bold px-2.5 py-0.5 rounded border ${badgeStyle}">${stateLabel}</span>
-                        </td>
-                        <td class="py-3.5 text-center">
-                            <button onclick="deleteAsset('slayer', ${globalIndex})" class="text-xs text-rose-400 hover:text-rose-300 hover:underline">Remove</button>
-                        </td>
-                    </tr>`;
-            });
+            const activeItems = userDatabase.slayerLoot.filter(i => activeSubTab === "custom" ? !i.group : i.group === activeSubTab);
+            renderSlayerTable(rawLivePrices, activeItems);
+            renderFlippingRadar(radarPrices);
+            document.getElementById("sync-indicator").innerText = "Synced: " + new Date().toLocaleTimeString();
         }
 
-        function renderInvestmentTable(prices) {
-            const target = document.getElementById("investment-rows"); target.innerHTML = "";
-            userDatabase.investments.forEach((item, index) => {
+        function renderSlayerTable(prices, items) {
+            const t = document.getElementById("slayer-loot-rows"); t.innerHTML = "";
+            items.forEach((item, idx) => {
                 const live = prices[item.id];
-                let currentPrice = live ? ((live.avgHighPrice > 0 && live.avgLowPrice > 0) ? Math.round((live.avgHighPrice + live.avgLowPrice) / 2) : (live.avgHighPrice || live.avgLowPrice || 0)) : 0;
-
-                const itemQty = item.qty || 1;
-                const totalNetProfit = Math.round((currentPrice - calculateGETax(currentPrice) - item.entryCost) * itemQty);
-                const roi = (((currentPrice - calculateGETax(currentPrice) - item.entryCost) / item.entryCost) * 100).toFixed(1);
-
-                let stateLabel = "ACCUMULATING"; let badgeStyle = "bg-gray-800 text-gray-400 border-gray-600";
-                if (currentPrice >= item.exitTarget) { stateLabel = "TAKE PROFIT"; badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800"; }
-                else if (roi < 0) { stateLabel = "UNDERWATER"; badgeStyle = "bg-rose-950 text-rose-400 border-rose-900"; }
-
-                target.innerHTML += `
-                    <tr class="hover:bg-gray-700/20">
-                        <td class="py-4 font-semibold text-gray-100">${item.name}</td>
-                        <td class="py-4 text-right font-mono text-gray-300">${itemQty.toLocaleString()}</td>
-                        <td class="py-4 text-right font-mono text-gray-400">${item.entryCost.toLocaleString()} GP</td>
-                        <td class="py-4 text-right font-mono text-gray-400">${item.exitTarget.toLocaleString()} GP</td>
-                        <td class="py-4 text-right font-mono font-bold text-cyan-400">${currentPrice.toLocaleString()} GP</td>
-                        <td class="py-4 text-right font-mono ${totalNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${totalNetProfit.toLocaleString()} GP</td>
-                        <td class="py-4 text-right font-mono font-bold ${roi >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${roi}%</td>
-                        <td class="py-4 text-center"><span class="text-xs font-bold px-2.5 py-1 rounded border ${badgeStyle}">${stateLabel}</span></td>
-                        <td class="py-4 text-center space-x-2">
-                            <button onclick="archiveTrade(${index})" class="text-xs text-emerald-400 font-bold hover:underline">Archive Trade</button>
-                            <span class="text-gray-600">|</span>
-                            <button onclick="deleteAsset('investment', ${index})" class="text-xs text-rose-400 hover:underline">Delete</button>
-                        </td>
-                    </tr>`;
+                const price = live ? (live.avgLowPrice || live.avgHighPrice || 0) : 0;
+                t.innerHTML += `<tr class="hover:bg-gray-700/20">
+                    <td class="py-3 pl-3 font-semibold">${item.name}</td>
+                    <td class="py-3 text-right text-gray-400">-</td>
+                    <td class="py-3 text-right text-gray-400">-</td>
+                    <td class="py-3 text-right text-amber-500 font-bold">${price.toLocaleString()}</td>
+                    <td class="py-3 text-center">-</td>
+                    <td class="py-3 text-center"><button onclick="deleteAsset('slayer', ${idx})" class="text-rose-400 text-xs">Remove</button></td>
+                </tr>`;
             });
         }
 
         function renderFlippingRadar(prices) {
-            const target = document.getElementById("flipping-radar-rows"); 
-            target.innerHTML = "";
-
-            if (!prices || !itemDictionary) return;
-            const candidates = [];
-            
-            Object.keys(itemDictionary).forEach(keyString => {
-                const itemMeta = itemDictionary[keyString];
-                const liveData = prices[itemMeta.id];
+            const t = document.getElementById("flipping-radar-rows"); t.innerHTML = "";
+            if (!prices) return;
+            const list = Object.keys(itemDictionary).map(k => {
+                const meta = itemDictionary[k];
+                const live = prices[meta.id];
+                if (!live || !live.avgLowPrice || !live.avgHighPrice || !meta.limit) return null;
+                if (currentPriceFilter === "premium" && live.avgLowPrice < 1000000) return null;
                 
-                if (!liveData || !liveData.avgHighPrice || !liveData.avgLowPrice || !itemMeta.limit) return;
-                const buyPrice = liveData.avgLowPrice;
-
-                if (currentPriceFilter === "premium" && buyPrice < 1000000) return;
-
-                const immediateFiveMinVolume = (liveData.highPriceVolume || 0) + (liveData.lowPriceVolume || 0);
-                const minimumRequiredMomentum = Math.ceil(itemMeta.limit * 0.05);
-                if (immediateFiveMinVolume < minimumRequiredMomentum) return;
-
-                const sellPrice = liveData.avgHighPrice;
-                const grossSpread = sellPrice - buyPrice;
-                if (grossSpread <= 0) return;
-
-                const tax = calculateGETax(sellPrice);
-                const netProfitPerUnit = grossSpread - tax;
-                if (netProfitPerUnit <= 0) return;
-
-                const maxSlotYieldGP = Math.round(netProfitPerUnit * itemMeta.limit);
-                if (maxSlotYieldGP < 200000) return;
-
-                const totalBuyInCapital = buyPrice * itemMeta.limit;
-
-                candidates.push({
-                    name: itemMeta.name, buy: buyPrice, sell: sellPrice, unitProfit: netProfitPerUnit,
-                    limit: itemMeta.limit, slotYield: maxSlotYieldGP, capitalRequired: totalBuyInCapital
-                });
-            });
-
-            candidates.sort((a, b) => b.slotYield - a.slotYield);
-            const topTenScalableFlips = candidates.slice(0, 10);
-
-            if (topTenScalableFlips.length === 0) {
-                target.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-500 leading-relaxed">No high-margin items matching constraints are moving.</td></tr>`;
-                return;
-            }
-
-            topTenScalableFlips.forEach(item => {
-                target.innerHTML += `
-                    <tr class="hover:bg-gray-700/20 transition-all">
-                        <td class="py-3.5 font-semibold text-gray-200">${item.name}</td>
-                        <td class="py-3.5 text-right font-mono text-gray-400">${item.buy.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono text-gray-400">${item.sell.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono text-emerald-400 font-medium">+${item.unitProfit.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-center font-mono text-gray-300 font-medium">${item.limit.toLocaleString()}</td>
-                        <td class="py-3.5 text-right font-mono text-cyan-400 font-black">${item.slotYield.toLocaleString()} GP</td>
-                        <td class="py-3.5 text-right font-mono text-gray-500 text-xs">${item.capitalRequired.toLocaleString()} GP</td>
-                    </tr>`;
-            });
-        }
-
-        function archiveTrade(index) {
-            const item = userDatabase.investments[index];
-            const salePriceStr = prompt(`Enter final realization scale value for "${item.name}" (GP per unit layout):`);
-            if (salePriceStr === null) return; 
+                const profit = (live.avgHighPrice - live.avgLowPrice) - calculateGETax(live.avgHighPrice);
+                const yieldGP = profit * meta.limit;
+                if (yieldGP < 200000) return null;
+                
+                return { name: meta.name, buy: live.avgLowPrice, sell: live.avgHighPrice, profit, limit: meta.limit, yieldGP, capital: live.avgLowPrice * meta.limit };
+            }).filter(i => i !== null).sort((a,b) => b.yieldGP - a.yieldGP).slice(0, 10);
             
-            const salePrice = parseInt(salePriceStr.replace(/,/g, ''));
-            if (isNaN(salePrice) || salePrice <= 0) return alert("Invalid price parameter string.");
-
-            const taxPaid = calculateGETax(salePrice);
-            const netRevenuePerUnit = salePrice - taxPaid;
-            const netProfitPerUnit = netRevenuePerUnit - item.entryCost;
-            
-            const closedEntry = {
-                name: item.name, qty: item.qty, buyPrice: item.entryCost, salePrice: salePrice,
-                profitTotal: Math.round(netProfitPerUnit * item.qty),
-                roi: ((netProfitPerUnit / item.entryCost) * 100).toFixed(1), date: new Date().toLocaleDateString()
-            };
-
-            userDatabase.history.unshift(closedEntry);
-            userDatabase.investments.splice(index, 1);
-            saveToLocalStorage(); fetchLivePrices();
-            alert("Position successfully logged into the historical archives.");
-        }
-
-        function renderHistoryLedger() {
-            const container = document.getElementById("history-ledger-rows"); container.innerHTML = "";
-            let totalQty = 0; let netProfitTotal = 0; let totalRoiSum = 0;
-            const records = userDatabase.history || [];
-
-            records.forEach(entry => {
-                totalQty += entry.qty; netProfitTotal += entry.profitTotal; totalRoiSum += parseFloat(entry.roi);
-                container.innerHTML += `
-                    <tr class="hover:bg-gray-700/10">
-                        <td class="py-3 font-semibold text-gray-200">${entry.name}</td>
-                        <td class="py-3 text-right font-mono text-gray-300">${entry.qty.toLocaleString()}</td>
-                        <td class="py-3 text-right font-mono text-gray-400">${entry.buyPrice.toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono text-emerald-500 font-bold">${entry.salePrice.toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono ${entry.profitTotal >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${entry.profitTotal.toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono font-bold ${entry.profitTotal >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${entry.roi}%</td>
-                        <td class="py-3 text-center text-xs text-gray-500">${entry.date}</td>
-                    </tr>`;
+            list.forEach(i => {
+                t.innerHTML += `<tr class="hover:bg-gray-700/20">
+                    <td class="py-3">${i.name}</td>
+                    <td class="py-3 text-right">${i.buy.toLocaleString()}</td>
+                    <td class="py-3 text-right">${i.sell.toLocaleString()}</td>
+                    <td class="py-3 text-right text-emerald-400">+${i.profit.toLocaleString()}</td>
+                    <td class="py-3 text-center">${i.limit.toLocaleString()}</td>
+                    <td class="py-3 text-right text-cyan-400 font-bold">${i.yieldGP.toLocaleString()}</td>
+                </tr>`;
             });
-            document.getElementById("stat-total-qty").innerText = totalQty.toLocaleString();
-            document.getElementById("stat-total-profit").innerText = `${netProfitTotal.toLocaleString()} GP`;
-            document.getElementById("stat-avg-roi").innerText = records.length ? `${(totalRoiSum / records.length).toFixed(1)}%` : "0.0%";
         }
 
         function handleAddAsset() {
-            const nameField = document.getElementById("input-name"); const rawName = nameField.value.trim();
-            const category = document.getElementById("input-category").value;
-            if (!rawName) return alert("Please type an item name.");
-
-            const matchedMeta = itemDictionary[rawName.toLowerCase()];
-            if (!matchedMeta) return alert(`Could not find that item name layout.`);
-
-            if (category === "slayer") {
-                userDatabase.slayerLoot.push({ id: matchedMeta.id, name: matchedMeta.name });
-                activeSubTab = "custom"; 
-            } else {
-                const entryVal = parseInt(document.getElementById("input-entry").value);
-                const qtyVal = parseInt(document.getElementById("input-qty").value);
-                if (isNaN(entryVal) || isNaN(qtyVal)) return alert("Fill entry parameters cleanly.");
-
-                userDatabase.investments.push({ 
-                    id: matchedMeta.id, name: matchedMeta.name, qty: qtyVal, entryCost: entryVal, exitTarget: Math.round(entryVal * 1.12) 
-                });
-            }
-            saveToLocalStorage();
-            nameField.value = ""; document.getElementById("input-entry").value = ""; document.getElementById("input-qty").value = "";
-            fetchLivePrices();
-        }
-
-        function deleteAsset(type, index) {
-            if (type === "slayer") userDatabase.slayerLoot.splice(index, 1);
-            else userDatabase.investments.splice(index, 1);
+            const name = document.getElementById("input-name").value.trim();
+            const meta = itemDictionary[name.toLowerCase()];
+            if (!meta) return alert("Item not found.");
+            userDatabase.slayerLoot.push({ id: meta.id, name: meta.name });
             saveToLocalStorage(); fetchLivePrices();
         }
 
-        function wipeTradeHistory() {
-            if (confirm("Permanently delete your historical ledger archive?")) {
-                userDatabase.history = []; saveToLocalStorage(); renderHistoryLedger();
-            }
-        }
-
-        function loadDefaultDataset() {
-            if (confirm("Reset tracking lists back to default blueprint settings? WARNING: This action will completely erase your active long term investments ledger data positions!")) {
-                localStorage.removeItem("osrs_dashboard_db");
-                userDatabase = {
-                    slayerLoot: [...MASTER_BLUEPRINT_LIST],
-                    investments: [],
-                    history: []
-                };
-                saveToLocalStorage(); 
-                activeSubTab = "gathering";
-                fetchLivePrices(); switchView('live');
-            }
-        }
-
+        function deleteAsset(t, idx) { userDatabase.slayerLoot.splice(idx, 1); saveToLocalStorage(); fetchLivePrices(); }
+        function loadDefaultDataset() { localStorage.removeItem("osrs_dashboard_db"); location.reload(); }
+        
         window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
