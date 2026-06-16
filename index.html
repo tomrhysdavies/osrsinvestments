@@ -104,26 +104,28 @@
                 </div>
             </section>
 
-            <!-- SECTION 3: LIVE QUICK-FLIPPING RADAR -->
+            <!-- SECTION 3: AUTOMATED REAL-TIME GLOBAL SCANNER -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
-                    <h2 class="text-xl font-bold text-emerald-400">Live Quick-Flipping Radar</h2>
-                    <p class="text-xs text-gray-400">Real-time spreads for your dedicated day-trading watchlist items. Factoring 2% GE Tax.</p>
+                    <h2 class="text-xl font-bold text-emerald-400">⚡ Global Live Flipping Radar (Top 10 Net ROI)</h2>
+                    <p class="text-xs text-gray-400">Scans the entire game economy in real-time. Displays liquid items exceeding **250 daily trades**, sorted cleanly by post-tax Net ROI % margins.</p>
                 </div>
                 <div class="w-full">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                                 <th class="pb-3">Item Name</th>
-                                <th class="pb-3 text-right">Your Buy Offer (Low)</th>
-                                <th class="pb-3 text-right">Your Sell Offer (High)</th>
+                                <th class="pb-3 text-right">GE Buy Offer (Low)</th>
+                                <th class="pb-3 text-right">GE Sell Offer (High)</th>
                                 <th class="pb-3 text-right">Gross Spread</th>
                                 <th class="pb-3 text-right">Net Profit / Unit</th>
-                                <th class="pb-3 text-center">ROI %</th>
-                                <th class="pb-3 text-center">Actions</th>
+                                <th class="pb-3 text-center">Estimated Daily Vol</th>
+                                <th class="pb-3 text-center">Net ROI %</th>
                             </tr>
                         </thead>
-                        <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
+                        <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm">
+                            <!-- Populated automatically by the global algorithmic engine -->
+                        </tbody>
                     </table>
                 </div>
             </section>
@@ -140,11 +142,9 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-400 mb-1">Category</label>
-                                <!-- UPDATED DROPDOWN TO ALLOW 3 DISTINCT MODULE CHOICES -->
                                 <select id="input-category" onchange="toggleFormFields()" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
                                     <option value="slayer">High Volume Items</option>
                                     <option value="investment">Long Term Investments</option>
-                                    <option value="flipping">Live Quick-Flipping Radar</option>
                                 </select>
                             </div>
                         </div>
@@ -230,15 +230,12 @@
                 { id: 26219, name: "Osmumten's Fang", qty: 1, entryCost: 18500000, exitTarget: 22000000 },
                 { id: 25865, name: "Bow of Faerdhinen (Inactive)", qty: 1, entryCost: 92000000, exitTarget: 105000000 }
             ],
-            flippingRadar: [
-                { id: 2363, name: "Runite Bar" },
-                { id: 443, name: "Gold Ore" }
-            ],
             history: []
         };
 
-        let userDatabase = { slayerLoot: [], investments: [], flippingRadar: [], history: [] };
+        let userDatabase = { slayerLoot: [], investments: [], history: [] };
         let itemDictionary = null; 
+        let reverseItemDictionary = null; // Key: ID -> Value: Clean Capitalized Name
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
 
@@ -251,7 +248,6 @@
             const localData = localStorage.getItem("osrs_dashboard_db");
             if (localData) {
                 userDatabase = JSON.parse(localData);
-                if (!userDatabase.flippingRadar) userDatabase.flippingRadar = [];
                 if (!userDatabase.history) userDatabase.history = [];
             } else {
                 userDatabase = INITIAL_SEED;
@@ -304,7 +300,12 @@
                 });
                 const mappingArray = await response.json();
                 itemDictionary = {};
-                mappingArray.forEach(item => { itemDictionary[item.name.toLowerCase().trim()] = item.id; });
+                reverseItemDictionary = {};
+                mappingArray.forEach(item => { 
+                    const cleanName = item.name.trim();
+                    itemDictionary[cleanName.toLowerCase()] = item.id; 
+                    reverseItemDictionary[item.id] = cleanName;
+                });
             } catch (err) { console.error(err); }
         }
 
@@ -347,7 +348,7 @@
                 }
                 renderSlayerTable(rawLivePrices, historicalRecords);
                 renderInvestmentTable(rawLivePrices);
-                renderFlippingRadar(rawLivePrices);
+                renderFlippingRadar(rawLivePrices); // Triggers automated screen loop calculations
                 syncIndicator.innerText = `Synced: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
                 syncIndicator.className = "text-xs bg-emerald-950 text-emerald-400 px-3 py-1.5 rounded-md border border-emerald-900";
             } catch (err) { console.error(err); }
@@ -422,26 +423,70 @@
             });
         }
 
-        // REWRITTEN: Now scans exclusively from the decoupled userDatabase.flippingRadar array
+        // ALGORITHMIC ENGINE UPDATE: Real-time scan of the complete OSRS economy filtered by volume and net ROI ranking
         function renderFlippingRadar(prices) {
-            const target = document.getElementById("flipping-radar-rows"); target.innerHTML = "";
-            userDatabase.flippingRadar.forEach((item, index) => {
-                const live = prices[item.id]; if (!live || !live.high || !live.low) return;
-                const buyPrice = live.low; const sellPrice = live.high;  
-                const netProfitPerUnit = (sellPrice - buyPrice) - calculateGETax(sellPrice);
-                const roi = ((netProfitPerUnit / buyPrice) * 100).toFixed(2);
+            const target = document.getElementById("flipping-radar-rows"); 
+            target.innerHTML = "";
 
+            if (!prices || !reverseItemDictionary) return;
+
+            const candidates = [];
+            const itemIds = Object.keys(prices);
+
+            itemIds.forEach(id => {
+                const liveData = prices[id];
+                if (!liveData || !liveData.high || !liveData.low) return;
+
+                // 1. DYNAMIC VOLUME CHECK: Combined trading volume must exceed your 250 floor constraint
+                const hourlyVol = (liveData.highTimeVolume || 0) + (liveData.lowTimeVolume || 0);
+                const estimatedDailyVolume = hourlyVol * 24;
+                if (estimatedDailyVolume < 250) return;
+
+                const buyPrice = liveData.low;
+                const sellPrice = liveData.high;
+                const grossSpread = sellPrice - buyPrice;
+                if (grossSpread <= 0) return;
+
+                // 2. APPLY THE 2% POST-TAX FORMULA RULES
+                const tax = calculateGETax(sellPrice);
+                const netProfit = grossSpread - tax;
+                if (netProfit <= 0) return;
+
+                // 3. GENERATE POST-TAX NET ROI METRICS
+                const netRoi = (netProfit / buyPrice) * 100;
+
+                const cleanItemName = reverseItemDictionary[id] || `Unknown Item (${id})`;
+
+                candidates.push({
+                    name: cleanItemName,
+                    buy: buyPrice,
+                    sell: sellPrice,
+                    spread: grossSpread,
+                    profit: netProfit,
+                    volume: estimatedDailyVolume,
+                    roi: netRoi
+                });
+            });
+
+            // 4. SORT BY HIGHEST Post-Tax Net ROI % AND TRUNCATE THE LIST TO THE TOP 10 WINNERS
+            candidates.sort((a, b) => b.roi - a.roi);
+            const topTenFlips = candidates.slice(0, 10);
+
+            if (topTenFlips.length === 0) {
+                target.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-500 leading-relaxed">No high-margin liquid commodities discovered. Try synchronizing prices again in a minute.</td></tr>`;
+                return;
+            }
+
+            topTenFlips.forEach(item => {
                 target.innerHTML += `
-                    <tr class="hover:bg-gray-700/20 transition-colors">
-                        <td class="py-3 font-semibold text-gray-200">${item.name}</td>
-                        <td class="py-3 text-right font-mono text-emerald-500 font-bold">${buyPrice.toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono text-orange-400">${sellPrice.toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono text-gray-400">${(sellPrice - buyPrice).toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono font-bold ${netProfitPerUnit > 0 ? 'text-emerald-400' : 'text-rose-400'}">${netProfitPerUnit.toLocaleString()} GP</td>
-                        <td class="py-3 text-center font-mono font-bold ${netProfitPerUnit > 0 ? 'text-emerald-400' : 'text-rose-400'}">${roi}%</td>
-                        <td class="py-3 text-center">
-                            <button onclick="deleteAsset('flipping', ${index})" class="text-xs text-rose-400 hover:underline">Remove</button>
-                        </td>
+                    <tr class="hover:bg-gray-700/20 transition-all">
+                        <td class="py-3.5 font-semibold text-gray-200">${item.name}</td>
+                        <td class="py-3.5 text-right font-mono text-emerald-400 font-bold">${item.buy.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono text-orange-400">${item.sell.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono text-gray-400">${item.spread.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-right font-mono text-emerald-400 font-bold">+${item.profit.toLocaleString()} GP</td>
+                        <td class="py-3.5 text-center font-mono text-cyan-400 font-medium">${item.volume.toLocaleString()}</td>
+                        <td class="py-3.5 text-center font-mono font-black text-emerald-400">${item.roi.toFixed(2)}%</td>
                     </tr>`;
             });
         }
@@ -499,19 +544,16 @@
             document.getElementById("stat-avg-roi").innerText = records.length ? `${(totalRoiSum / records.length).toFixed(1)}%` : "0.0%";
         }
 
-        // UPDATED: Standard add function altered to handle 3 routing targets natively
         function handleAddAsset() {
             const nameField = document.getElementById("input-name"); const rawName = nameField.value.trim();
             const category = document.getElementById("input-category").value;
             if (!rawName) return alert("Please type an item name.");
 
             const matchedId = itemDictionary[rawName.toLowerCase()];
-            if (!matchedId) return alert(`Could not cross-reference that item name structure.`);
+            if (!matchedId) return alert(`Could not find that item. Verify spelling rules match the OSRS Wiki.`);
 
             if (category === "slayer") {
                 userDatabase.slayerLoot.push({ id: matchedId, name: rawName });
-            } else if (category === "flipping") {
-                userDatabase.flippingRadar.push({ id: matchedId, name: rawName });
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
                 const qtyVal = parseInt(document.getElementById("input-qty").value);
@@ -528,7 +570,6 @@
 
         function deleteAsset(type, index) {
             if (type === "slayer") userDatabase.slayerLoot.splice(index, 1);
-            else if (type === "flipping") userDatabase.flippingRadar.splice(index, 1);
             else userDatabase.investments.splice(index, 1);
             saveToLocalStorage(); fetchLivePrices();
         }
