@@ -36,7 +36,7 @@
             </div>
         </header>
 
-        <!-- VIEW PANEL 1: LIVE MARKET MONITOR (Standard Desk Views) -->
+        <!-- VIEW PANEL 1: LIVE MARKET MONITOR -->
         <div id="panel-live" class="space-y-8">
             <!-- HEADER REFRESH BLOCK -->
             <div class="flex justify-end items-center gap-3">
@@ -108,7 +108,7 @@
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-emerald-400">Live Quick-Flipping Radar</h2>
-                    <p class="text-xs text-gray-400">Real-time spreads for rapid day-trading margin runs. Buy at Low, Sell at High (Factoring 2% GE Tax).</p>
+                    <p class="text-xs text-gray-400">Real-time spreads for your dedicated day-trading watchlist items. Factoring 2% GE Tax.</p>
                 </div>
                 <div class="w-full">
                     <table class="w-full text-left border-collapse">
@@ -120,6 +120,7 @@
                                 <th class="pb-3 text-right">Gross Spread</th>
                                 <th class="pb-3 text-right">Net Profit / Unit</th>
                                 <th class="pb-3 text-center">ROI %</th>
+                                <th class="pb-3 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
@@ -139,9 +140,11 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-400 mb-1">Category</label>
+                                <!-- UPDATED DROPDOWN TO ALLOW 3 DISTINCT MODULE CHOICES -->
                                 <select id="input-category" onchange="toggleFormFields()" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
                                     <option value="slayer">High Volume Items</option>
                                     <option value="investment">Long Term Investments</option>
+                                    <option value="flipping">Live Quick-Flipping Radar</option>
                                 </select>
                             </div>
                         </div>
@@ -168,10 +171,8 @@
             </section>
         </div>
 
-        <!-- VIEW PANEL 2: ARCHIVED HISTORICAL LEDGER (Hidden by Default) -->
+        <!-- VIEW PANEL 2: ARCHIVED HISTORICAL LEDGER -->
         <div id="panel-history" class="hidden space-y-8">
-            
-            <!-- HISTORICAL MACRO STATS ROW -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 shadow-md">
                     <span class="text-xs text-gray-400 uppercase tracking-wider block">Total Items Merchandised</span>
@@ -187,7 +188,6 @@
                 </div>
             </div>
 
-            <!-- HISTORY TABLE GRID -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4 flex justify-between items-center">
                     <div>
@@ -211,9 +211,7 @@
                                 <th class="pb-3 text-center">Closing Date</th>
                             </tr>
                         </thead>
-                        <tbody id="history-ledger-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Populated dynamically via local archival entries -->
-                        </tbody>
+                        <tbody id="history-ledger-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
                     </table>
                 </div>
             </section>
@@ -226,17 +224,20 @@
             slayerLoot: [
                 { id: 451, name: "Runite Ore" },
                 { id: 536, name: "Dragon Bones" },
-                { id: 1615, name: "Dragonstone" },
-                { id: 2363, name: "Runite Bar" }
+                { id: 1615, name: "Dragonstone" }
             ],
             investments: [
                 { id: 26219, name: "Osmumten's Fang", qty: 1, entryCost: 18500000, exitTarget: 22000000 },
                 { id: 25865, name: "Bow of Faerdhinen (Inactive)", qty: 1, entryCost: 92000000, exitTarget: 105000000 }
             ],
-            history: [] // Holds completed archived objects
+            flippingRadar: [
+                { id: 2363, name: "Runite Bar" },
+                { id: 443, name: "Gold Ore" }
+            ],
+            history: []
         };
 
-        let userDatabase = { slayerLoot: [], investments: [], history: [] };
+        let userDatabase = { slayerLoot: [], investments: [], flippingRadar: [], history: [] };
         let itemDictionary = null; 
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
@@ -250,7 +251,7 @@
             const localData = localStorage.getItem("osrs_dashboard_db");
             if (localData) {
                 userDatabase = JSON.parse(localData);
-                // Backwards compatibility safeguard to protect local database formats
+                if (!userDatabase.flippingRadar) userDatabase.flippingRadar = [];
                 if (!userDatabase.history) userDatabase.history = [];
             } else {
                 userDatabase = INITIAL_SEED;
@@ -263,6 +264,11 @@
 
         function saveToLocalStorage() {
             localStorage.setItem("osrs_dashboard_db", JSON.stringify(userDatabase));
+        }
+
+        function toggleFormFields() {
+            const category = document.getElementById("input-category").value;
+            document.getElementById("fields-investment").classList.toggle("hidden", category !== "investment");
         }
 
         function switchView(tab) {
@@ -416,6 +422,30 @@
             });
         }
 
+        // REWRITTEN: Now scans exclusively from the decoupled userDatabase.flippingRadar array
+        function renderFlippingRadar(prices) {
+            const target = document.getElementById("flipping-radar-rows"); target.innerHTML = "";
+            userDatabase.flippingRadar.forEach((item, index) => {
+                const live = prices[item.id]; if (!live || !live.high || !live.low) return;
+                const buyPrice = live.low; const sellPrice = live.high;  
+                const netProfitPerUnit = (sellPrice - buyPrice) - calculateGETax(sellPrice);
+                const roi = ((netProfitPerUnit / buyPrice) * 100).toFixed(2);
+
+                target.innerHTML += `
+                    <tr class="hover:bg-gray-700/20 transition-colors">
+                        <td class="py-3 font-semibold text-gray-200">${item.name}</td>
+                        <td class="py-3 text-right font-mono text-emerald-500 font-bold">${buyPrice.toLocaleString()} GP</td>
+                        <td class="py-3 text-right font-mono text-orange-400">${sellPrice.toLocaleString()} GP</td>
+                        <td class="py-3 text-right font-mono text-gray-400">${(sellPrice - buyPrice).toLocaleString()} GP</td>
+                        <td class="py-3 text-right font-mono font-bold ${netProfitPerUnit > 0 ? 'text-emerald-400' : 'text-rose-400'}">${netProfitPerUnit.toLocaleString()} GP</td>
+                        <td class="py-3 text-center font-mono font-bold ${netProfitPerUnit > 0 ? 'text-emerald-400' : 'text-rose-400'}">${roi}%</td>
+                        <td class="py-3 text-center">
+                            <button onclick="deleteAsset('flipping', ${index})" class="text-xs text-rose-400 hover:underline">Remove</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
         function archiveTrade(index) {
             const item = userDatabase.investments[index];
             const salePriceStr = prompt(`Enter final realization scale value for "${item.name}" (GP per unit layout):`);
@@ -438,8 +468,8 @@
                 date: new Date().toLocaleDateString()
             };
 
-            userDatabase.history.unshift(closedEntry); // Push to top of list
-            userDatabase.investments.splice(index, 1); // Delete from active desk
+            userDatabase.history.unshift(closedEntry);
+            userDatabase.investments.splice(index, 1);
             
             saveToLocalStorage();
             fetchLivePrices();
@@ -447,17 +477,12 @@
         }
 
         function renderHistoryLedger() {
-            const container = document.getElementById("history-ledger-rows");
-            container.innerHTML = "";
-
+            const container = document.getElementById("history-ledger-rows"); container.innerHTML = "";
             let totalQty = 0; let netProfitTotal = 0; let totalRoiSum = 0;
             const records = userDatabase.history || [];
 
             records.forEach(entry => {
-                totalQty += entry.qty;
-                netProfitTotal += entry.profitTotal;
-                totalRoiSum += parseFloat(entry.roi);
-
+                totalQty += entry.qty; netProfitTotal += entry.profitTotal; totalRoiSum += parseFloat(entry.roi);
                 container.innerHTML += `
                     <tr class="hover:bg-gray-700/10">
                         <td class="py-3 font-semibold text-gray-200">${entry.name}</td>
@@ -469,43 +494,24 @@
                         <td class="py-3 text-center text-xs text-gray-500">${entry.date}</td>
                     </tr>`;
             });
-
             document.getElementById("stat-total-qty").innerText = totalQty.toLocaleString();
             document.getElementById("stat-total-profit").innerText = `${netProfitTotal.toLocaleString()} GP`;
             document.getElementById("stat-avg-roi").innerText = records.length ? `${(totalRoiSum / records.length).toFixed(1)}%` : "0.0%";
         }
 
-        function renderFlippingRadar(prices) {
-            const target = document.getElementById("flipping-radar-rows"); target.innerHTML = "";
-            const allTrackedItems = [...userDatabase.slayerLoot, ...userDatabase.investments];
-            allTrackedItems.forEach(item => {
-                const live = prices[item.id]; if (!live || !live.high || !live.low) return;
-                const buyPrice = live.low; const sellPrice = live.high;  
-                const netProfitPerUnit = (sellPrice - buyPrice) - calculateGETax(sellPrice);
-                const roi = ((netProfitPerUnit / buyPrice) * 100).toFixed(2);
-
-                target.innerHTML += `
-                    <tr class="hover:bg-gray-700/20 transition-colors">
-                        <td class="py-3 font-semibold text-gray-200">${item.name}</td>
-                        <td class="py-3 text-right font-mono text-emerald-500 font-bold">${buyPrice.toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono text-orange-400">${sellPrice.toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono text-gray-400">${(sellPrice - buyPrice).toLocaleString()} GP</td>
-                        <td class="py-3 text-right font-mono font-bold ${netProfitPerUnit > 0 ? 'text-emerald-400' : 'text-rose-400'}">${netProfitPerUnit.toLocaleString()} GP</td>
-                        <td class="py-3 text-center font-mono font-bold ${netProfitPerUnit > 0 ? 'text-emerald-400' : 'text-rose-400'}">${roi}%</td>
-                    </tr>`;
-            });
-        }
-
+        // UPDATED: Standard add function altered to handle 3 routing targets natively
         function handleAddAsset() {
             const nameField = document.getElementById("input-name"); const rawName = nameField.value.trim();
             const category = document.getElementById("input-category").value;
             if (!rawName) return alert("Please type an item name.");
 
             const matchedId = itemDictionary[rawName.toLowerCase()];
-            if (!matchedId) return alert(`Could not find item string configurations.`);
+            if (!matchedId) return alert(`Could not cross-reference that item name structure.`);
 
             if (category === "slayer") {
                 userDatabase.slayerLoot.push({ id: matchedId, name: rawName });
+            } else if (category === "flipping") {
+                userDatabase.flippingRadar.push({ id: matchedId, name: rawName });
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
                 const qtyVal = parseInt(document.getElementById("input-qty").value);
@@ -522,15 +528,14 @@
 
         function deleteAsset(type, index) {
             if (type === "slayer") userDatabase.slayerLoot.splice(index, 1);
+            else if (type === "flipping") userDatabase.flippingRadar.splice(index, 1);
             else userDatabase.investments.splice(index, 1);
             saveToLocalStorage(); fetchLivePrices();
         }
 
         function wipeTradeHistory() {
-            if (confirm("Permanently delete your historical ledger archive? This operation is completely irreversible.")) {
-                userDatabase.history = [];
-                saveToLocalStorage();
-                renderHistoryLedger();
+            if (confirm("Permanently delete your historical ledger archive?")) {
+                userDatabase.history = []; saveToLocalStorage(); renderHistoryLedger();
             }
         }
 
@@ -538,8 +543,7 @@
             if (confirm("Reset tracking lists back to default samples?")) {
                 localStorage.removeItem("osrs_dashboard_db");
                 userDatabase = JSON.parse(JSON.stringify(INITIAL_SEED));
-                saveToLocalStorage(); fetchLivePrices();
-                switchView('live');
+                saveToLocalStorage(); fetchLivePrices(); switchView('live');
             }
         }
 
