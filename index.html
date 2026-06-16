@@ -108,7 +108,7 @@
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-emerald-400">⚡ Global Live Flipping Radar (Top 10 Net ROI)</h2>
-                    <p class="text-xs text-gray-400">Scans the entire game economy in real-time. Displays liquid items exceeding **250 daily trades**, sorted cleanly by post-tax Net ROI % margins.</p>
+                    <p class="text-xs text-gray-400">Scans the entire game economy in real-time using live hourly records. Displays liquid items exceeding **250 daily trades**, sorted cleanly by post-tax Net ROI % margins.</p>
                 </div>
                 <div class="w-full">
                     <table class="w-full text-left border-collapse">
@@ -235,7 +235,7 @@
 
         let userDatabase = { slayerLoot: [], investments: [], history: [] };
         let itemDictionary = null; 
-        let reverseItemDictionary = null; // Key: ID -> Value: Clean Capitalized Name
+        let reverseItemDictionary = null; 
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
 
@@ -313,7 +313,8 @@
             const syncIndicator = document.getElementById("sync-indicator");
             syncIndicator.innerText = "Analyzing Volumes & Prices...";
             try {
-                const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/latest", {
+                // FIXED DATA ROUTE: Now loads the hourly volume metrics payload directly from /1h wrapper endpoint
+                const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/1h", {
                     headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
                 });
                 const livePayload = await liveResponse.json();
@@ -348,7 +349,7 @@
                 }
                 renderSlayerTable(rawLivePrices, historicalRecords);
                 renderInvestmentTable(rawLivePrices);
-                renderFlippingRadar(rawLivePrices); // Triggers automated screen loop calculations
+                renderFlippingRadar(rawLivePrices); 
                 syncIndicator.innerText = `Synced: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
                 syncIndicator.className = "text-xs bg-emerald-950 text-emerald-400 px-3 py-1.5 rounded-md border border-emerald-900";
             } catch (err) { console.error(err); }
@@ -358,7 +359,7 @@
             const target = document.getElementById("slayer-loot-rows"); target.innerHTML = "";
             userDatabase.slayerLoot.forEach((item, index) => {
                 const live = prices[item.id]; const hist = history[item.id];
-                let currentSell = live ? ((live.low > 0) ? live.low : (live.high || 0)) : 0;
+                let currentSell = live ? ((live.avgLowPrice > 0) ? live.avgLowPrice : (live.avgHighPrice || 0)) : 0;
                 const marketLow = hist && hist.min ? hist.min : Math.round(currentSell * 0.95);
                 const marketHigh = hist && hist.max ? hist.max : Math.round(currentSell * 1.05);
                 const positionPct = (marketHigh - marketLow) > 0 ? ((currentSell - marketLow) / (marketHigh - marketLow)) * 100 : 50;
@@ -394,7 +395,7 @@
             const target = document.getElementById("investment-rows"); target.innerHTML = "";
             userDatabase.investments.forEach((item, index) => {
                 const live = prices[item.id];
-                let currentPrice = live ? ((live.high > 0 && live.low > 0) ? Math.round((live.high + live.low) / 2) : (live.high || live.low || 0)) : 0;
+                let currentPrice = live ? ((live.avgHighPrice > 0 && live.avgLowPrice > 0) ? Math.round((live.avgHighPrice + live.avgLowPrice) / 2) : (live.avgHighPrice || live.avgLowPrice || 0)) : 0;
 
                 const itemQty = item.qty || 1;
                 const totalNetProfit = Math.round((currentPrice - calculateGETax(currentPrice) - item.entryCost) * itemQty);
@@ -423,7 +424,7 @@
             });
         }
 
-        // ALGORITHMIC ENGINE UPDATE: Real-time scan of the complete OSRS economy filtered by volume and net ROI ranking
+        // FIXED FIELD MAPPINGS: Refactored to scan the accurate hourly data fields (avgLowPrice, avgHighPrice, highPriceVolume, lowPriceVolume)
         function renderFlippingRadar(prices) {
             const target = document.getElementById("flipping-radar-rows"); 
             target.innerHTML = "";
@@ -435,15 +436,15 @@
 
             itemIds.forEach(id => {
                 const liveData = prices[id];
-                if (!liveData || !liveData.high || !liveData.low) return;
+                if (!liveData || !liveData.avgHighPrice || !liveData.avgLowPrice) return;
 
-                // 1. DYNAMIC VOLUME CHECK: Combined trading volume must exceed your 250 floor constraint
-                const hourlyVol = (liveData.highTimeVolume || 0) + (liveData.lowTimeVolume || 0);
+                // 1. RESOLVED VOLUME CHECK: Uses the explicit hourly quantity parameters present on /1h response
+                const hourlyVol = (liveData.highPriceVolume || 0) + (liveData.lowPriceVolume || 0);
                 const estimatedDailyVolume = hourlyVol * 24;
                 if (estimatedDailyVolume < 250) return;
 
-                const buyPrice = liveData.low;
-                const sellPrice = liveData.high;
+                const buyPrice = liveData.avgLowPrice;
+                const sellPrice = liveData.avgHighPrice;
                 const grossSpread = sellPrice - buyPrice;
                 if (grossSpread <= 0) return;
 
