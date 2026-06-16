@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSRS GE Market Watch</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; }
@@ -15,35 +14,21 @@
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
 
     <div class="max-w-7xl mx-auto px-4 py-8">
-        
-        <!-- App Header -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-4 mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">
-                    ⚔️ OSRS GE Market Watch
-                </h1>
+                <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">⚔️ OSRS GE Market Watch</h1>
                 <p class="text-gray-400 text-sm mt-1">Track live banking tabs or analyze historical completed trade statistics.</p>
             </div>
-            
             <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-800">
-                <button id="tab-live" onclick="switchView('live')" class="px-4 py-2 text-xs font-bold rounded transition-colors bg-amber-600 text-gray-900">
-                    📈 Live Market Desk
-                </button>
-                <button id="tab-history" onclick="switchView('history')" class="px-4 py-2 text-xs font-bold rounded transition-colors text-gray-400 hover:text-gray-200 flex items-center gap-2">
-                    📜 Archived Trade Ledger
-                </button>
+                <button id="tab-live" onclick="switchView('live')" class="px-4 py-2 text-xs font-bold rounded transition-colors bg-amber-600 text-gray-900">📈 Live Market Desk</button>
+                <button id="tab-history" onclick="switchView('history')" class="px-4 py-2 text-xs font-bold rounded transition-colors text-gray-400 hover:text-gray-200">📜 Archived Trade Ledger</button>
             </div>
         </header>
 
-        <!-- VIEW PANEL 1: LIVE MARKET MONITOR -->
         <div id="panel-live" class="space-y-8">
             <div class="flex justify-end items-center gap-3">
-                <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
-                    Status: Initializing...
-                </span>
-                <button onclick="fetchLivePrices()" class="bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold px-4 py-2 rounded shadow transition-all text-sm">
-                    🔄 Synchronize Prices
-                </button>
+                <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">Status: Initializing...</span>
+                <button onclick="fetchLivePrices()" class="bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold px-4 py-2 rounded shadow transition-all text-sm">🔄 Synchronize Prices</button>
             </div>
 
             <!-- SECTION 1: HIGH VOLUME ITEMS -->
@@ -51,17 +36,10 @@
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-gray-700 pb-4">
                     <div>
                         <h2 class="text-xl font-bold text-amber-400">High Volume Commodities Watchlist</h2>
-                        <p class="text-xs text-gray-400">Heatmapped rows isolate action zones. Rows glow <span class="text-emerald-400 font-semibold">Green</span> for prime dump targets and <span class="text-cyan-400 font-semibold">Cyan</span> for volume breakouts.</p>
-                    </div>
-                    
-                    <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-700 self-end lg:self-auto">
-                        <button id="btn-7d" onclick="setTimeframe(7)" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900">7D</button>
-                        <button id="btn-30d" onclick="setTimeframe(30)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">30D</button>
-                        <button id="btn-90d" onclick="setTimeframe(90)" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200">90D</button>
+                        <p class="text-xs text-gray-400">Heatmapped rows isolate action zones.</p>
                     </div>
                 </div>
 
-                <!-- SUB-CATEGORY TABS -->
                 <div class="flex flex-wrap gap-2 mb-4 border-b border-gray-700/40 pb-3">
                     <button id="subtab-gathering" onclick="switchSubTab('gathering')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700">⛏️ Gathering</button>
                     <button id="subtab-combat" onclick="switchSubTab('combat')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">☠️ Combat</button>
@@ -71,107 +49,39 @@
                     <button id="subtab-custom" onclick="switchSubTab('custom')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200">⭐ Custom</button>
                 </div>
                 
-                <div class="w-full">
-                    <table class="w-full text-left border-collapse table-auto">
-                        <thead>
-                            <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                                <th class="pb-3 pl-2">Item Name</th>
-                                <th class="pb-3 text-right" id="lbl-low-heading">7D Low</th>
-                                <th class="pb-3 text-right" id="lbl-high-heading">7D High</th>
-                                <th class="pb-3 text-right">Price</th>
-                                <th class="pb-3 text-center">Status</th>
-                                <th class="pb-3 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/30 text-sm"></tbody>
-                    </table>
-                </div>
+                <table class="w-full text-left border-collapse table-auto">
+                    <thead>
+                        <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
+                            <th class="pb-3 pl-2">Item Name</th>
+                            <th class="pb-3 text-right">Price</th>
+                            <th class="pb-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/30 text-sm"></tbody>
+                </table>
             </section>
 
-            <!-- SECTION 2: LONG TERM INVESTMENTS -->
-            <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <h2 class="text-xl font-bold text-cyan-400 mb-4">Long Term Investments</h2>
-                <div class="w-full">
-                    <table class="w-full text-left border-collapse table-auto">
-                        <thead>
-                            <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                                <th class="pb-3">Unique Item</th>
-                                <th class="pb-3 text-right">Qty</th>
-                                <th class="pb-3 text-right">Entry</th>
-                                <th class="pb-3 text-right">Exit Target</th>
-                                <th class="pb-3 text-right">Live</th>
-                                <th class="pb-3 text-right">Net Profit</th>
-                                <th class="pb-3 text-right">ROI %</th>
-                                <th class="pb-3 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="investment-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- SECTION 3: AUTOMATED REAL-TIME GLOBAL SCANNER -->
+            <!-- SECTION 3: FLIPPING RADAR -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <h2 class="text-xl font-bold text-emerald-400">⚡ Global High-Yield Flipping Radar</h2>
                     <div class="bg-gray-950 p-1 rounded-lg border border-gray-700 flex items-center">
                         <button id="filter-all" onclick="setPriceFilter('all')" class="px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all">All</button>
-                        <button id="filter-premium" onclick="setPriceFilter('premium')" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all">👑 High-Tier Only</button>
+                        <button id="filter-premium" onclick="setPriceFilter('premium')" class="px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all">👑 1M+ Only</button>
                     </div>
                 </div>
-                <div class="w-full">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                                <th class="pb-3">Item Name</th>
-                                <th class="pb-3 text-right">Buy</th>
-                                <th class="pb-3 text-right">Sell</th>
-                                <th class="pb-3 text-right">Profit/U</th>
-                                <th class="pb-3 text-center">4H Limit</th>
-                                <th class="pb-3 text-right text-cyan-400">Max Yield</th>
-                            </tr>
-                        </thead>
-                        <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- SECTION 4: ADD ITEMS -->
-            <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <h2 class="text-lg font-bold text-gray-200 mb-4">🛠️ Add Items</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 space-y-4">
-                        <div class="grid grid-cols-1 gap-4">
-                            <input type="text" id="input-name" placeholder="Item name..." class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
-                            <select id="input-category" onchange="toggleFormFields()" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
-                                <option value="slayer">Add to High Volume</option>
-                                <option value="investment">Add to Investments</option>
-                            </select>
-                        </div>
-                        <div id="fields-investment" class="hidden grid grid-cols-1 gap-4">
-                            <input type="number" id="input-entry" placeholder="Buy Price" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
-                            <input type="number" id="input-qty" placeholder="Quantity" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm">
-                        </div>
-                        <button onclick="handleAddAsset()" class="w-full bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold py-2 rounded text-sm">Add Item</button>
-                    </div>
-                    <button onclick="loadDefaultDataset()" class="border border-gray-700 hover:bg-rose-950 text-rose-400 rounded text-sm">Reset Database</button>
-                </div>
-            </section>
-        </div>
-
-        <!-- PANEL 2: HISTORY -->
-        <div id="panel-history" class="hidden space-y-8">
-            <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <button onclick="wipeTradeHistory()" class="text-xs border border-rose-900 text-rose-400 mb-4 px-3 py-1 rounded">Wipe History</button>
-                <table class="w-full text-left border-collapse table-auto">
+                <table class="w-full text-left border-collapse text-sm">
                     <thead>
                         <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                             <th class="pb-3">Item</th>
-                            <th class="pb-3 text-right">Profit</th>
-                            <th class="pb-3 text-right">Date</th>
+                            <th class="pb-3 text-right">Buy</th>
+                            <th class="pb-3 text-right">Sell</th>
+                            <th class="pb-3 text-right">Profit/U</th>
+                            <th class="pb-3 text-center">Limit</th>
+                            <th class="pb-3 text-right text-cyan-400">Max Yield</th>
                         </tr>
                     </thead>
-                    <tbody id="history-ledger-rows" class="divide-y divide-gray-700/50 text-sm"></tbody>
+                    <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50"></tbody>
                 </table>
             </section>
         </div>
@@ -207,48 +117,20 @@
         let userDatabase = { slayerLoot: [], investments: [], history: [] };
         let itemDictionary = null; 
         let rawLivePrices = null; 
-        let currentTimeframe = 7; 
         let currentPriceFilter = "all"; 
         let activeSubTab = "gathering"; 
-
-        function calculateGETax(price) { return Math.min(Math.floor(price * 0.02), 5000000); }
 
         async function initApp() {
             const localData = localStorage.getItem("osrs_dashboard_db");
             userDatabase = localData ? JSON.parse(localData) : { slayerLoot: [], investments: [], history: [] };
-            
-            MASTER_BLUEPRINT_LIST.forEach(b => {
-                if (!userDatabase.slayerLoot.find(i => i.id === b.id)) userDatabase.slayerLoot.push(b);
-            });
-            
+            MASTER_BLUEPRINT_LIST.forEach(b => { if (!userDatabase.slayerLoot.find(i => i.id === b.id)) userDatabase.slayerLoot.push(b); });
             saveToLocalStorage();
             await fetchItemDictionary();
             await fetchLivePrices();
         }
 
         function saveToLocalStorage() { localStorage.setItem("osrs_dashboard_db", JSON.stringify(userDatabase)); }
-        function toggleFormFields() { document.getElementById("fields-investment").classList.toggle("hidden", document.getElementById("input-category").value !== "investment"); }
-        function switchView(tab) {
-            document.getElementById("panel-live").classList.toggle("hidden", tab !== "live");
-            document.getElementById("panel-history").classList.toggle("hidden", tab !== "history");
-            document.getElementById("tab-live").className = (tab === "live") ? "px-4 py-2 text-xs font-bold rounded bg-amber-600 text-gray-900" : "px-4 py-2 text-xs font-bold rounded text-gray-400";
-            document.getElementById("tab-history").className = (tab === "history") ? "px-4 py-2 text-xs font-bold rounded bg-amber-600 text-gray-900" : "px-4 py-2 text-xs font-bold rounded text-gray-400";
-        }
-        function switchSubTab(t) {
-            activeSubTab = t;
-            ["gathering","combat","herbs","alchables","ammo","custom"].forEach(sub => {
-                document.getElementById(`subtab-${sub}`).className = (sub === t) ? "px-3 py-1.5 text-xs font-bold rounded bg-gray-900 text-amber-400 border border-gray-700" : "px-3 py-1.5 text-xs font-bold rounded bg-gray-800 text-gray-400 hover:text-gray-200";
-            });
-            fetchLivePrices();
-        }
-        function setPriceFilter(m) {
-            currentPriceFilter = m;
-            document.getElementById("filter-all").className = (m === 'all') ? "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all" : "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all";
-            document.getElementById("filter-premium").className = (m === 'premium') ? "px-3 py-1 text-xs font-bold rounded bg-amber-600 text-gray-900 transition-all" : "px-3 py-1 text-xs font-bold rounded text-gray-400 hover:text-gray-200 transition-all";
-            renderFlippingRadar(rawLivePrices);
-        }
-        function setTimeframe(d) { currentTimeframe = d; fetchLivePrices(); }
-
+        
         async function fetchItemDictionary() {
             const res = await fetch("https://prices.runescape.wiki/api/v1/osrs/mapping", { headers: {'User-Agent': 'Market Tool'} });
             const arr = await res.json();
@@ -264,8 +146,7 @@
             
             const activeItems = userDatabase.slayerLoot.filter(i => activeSubTab === "custom" ? !i.group : i.group === activeSubTab);
             renderSlayerTable(rawLivePrices, activeItems);
-            renderFlippingRadar(radarPrices);
-            document.getElementById("sync-indicator").innerText = "Synced: " + new Date().toLocaleTimeString();
+            renderFlippingRadar(radarPrices || rawLivePrices); 
         }
 
         function renderSlayerTable(prices, items) {
@@ -275,29 +156,25 @@
                 const price = live ? (live.avgLowPrice || live.avgHighPrice || 0) : 0;
                 t.innerHTML += `<tr class="hover:bg-gray-700/20">
                     <td class="py-3 pl-3 font-semibold">${item.name}</td>
-                    <td class="py-3 text-right text-gray-400">-</td>
-                    <td class="py-3 text-right text-gray-400">-</td>
+                    <td class="py-3 text-right text-gray-400">-</td><td class="py-3 text-right text-gray-400">-</td>
                     <td class="py-3 text-right text-amber-500 font-bold">${price.toLocaleString()}</td>
                     <td class="py-3 text-center">-</td>
-                    <td class="py-3 text-center"><button onclick="deleteAsset('slayer', ${idx})" class="text-rose-400 text-xs">Remove</button></td>
+                    <td class="py-3 text-center"><button onclick="deleteAsset(${idx})" class="text-rose-400 text-xs">Remove</button></td>
                 </tr>`;
             });
         }
 
         function renderFlippingRadar(prices) {
             const t = document.getElementById("flipping-radar-rows"); t.innerHTML = "";
-            if (!prices) return;
             const list = Object.keys(itemDictionary).map(k => {
                 const meta = itemDictionary[k];
                 const live = prices[meta.id];
-                if (!live || !live.avgLowPrice || !live.avgHighPrice || !meta.limit) return null;
+                if (!live || !live.avgHighPrice || !live.avgLowPrice || !meta.limit) return null;
                 if (currentPriceFilter === "premium" && live.avgLowPrice < 1000000) return null;
-                
-                const profit = (live.avgHighPrice - live.avgLowPrice) - calculateGETax(live.avgHighPrice);
+                const profit = (live.avgHighPrice - live.avgLowPrice) - Math.min(Math.floor(live.avgHighPrice * 0.02), 5000000);
                 const yieldGP = profit * meta.limit;
                 if (yieldGP < 200000) return null;
-                
-                return { name: meta.name, buy: live.avgLowPrice, sell: live.avgHighPrice, profit, limit: meta.limit, yieldGP, capital: live.avgLowPrice * meta.limit };
+                return { name: meta.name, buy: live.avgLowPrice, sell: live.avgHighPrice, profit, limit: meta.limit, yieldGP };
             }).filter(i => i !== null).sort((a,b) => b.yieldGP - a.yieldGP).slice(0, 10);
             
             list.forEach(i => {
@@ -307,22 +184,14 @@
                     <td class="py-3 text-right">${i.sell.toLocaleString()}</td>
                     <td class="py-3 text-right text-emerald-400">+${i.profit.toLocaleString()}</td>
                     <td class="py-3 text-center">${i.limit.toLocaleString()}</td>
-                    <td class="py-3 text-right text-cyan-400 font-bold">${i.yieldGP.toLocaleString()}</td>
+                    <td class="py-3 text-right text-cyan-400 font-bold">${i.yieldGP.toLocaleString()} GP</td>
                 </tr>`;
             });
         }
-
-        function handleAddAsset() {
-            const name = document.getElementById("input-name").value.trim();
-            const meta = itemDictionary[name.toLowerCase()];
-            if (!meta) return alert("Item not found.");
-            userDatabase.slayerLoot.push({ id: meta.id, name: meta.name });
-            saveToLocalStorage(); fetchLivePrices();
-        }
-
-        function deleteAsset(t, idx) { userDatabase.slayerLoot.splice(idx, 1); saveToLocalStorage(); fetchLivePrices(); }
-        function loadDefaultDataset() { localStorage.removeItem("osrs_dashboard_db"); location.reload(); }
         
+        function switchSubTab(t) { activeSubTab = t; fetchLivePrices(); }
+        function setPriceFilter(m) { currentPriceFilter = m; renderFlippingRadar(rawLivePrices); }
+        function deleteAsset(idx) { userDatabase.slayerLoot.splice(idx, 1); saveToLocalStorage(); fetchLivePrices(); }
         window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
