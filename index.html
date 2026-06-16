@@ -249,7 +249,7 @@
             try {
                 // 1. Fetch live price layout snapshots
                 const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/latest", {
-                    headers: { 'User-Agent': 'OSRS Market Watch Tool - DashboardEngine' }
+                    headers: { 'User-Agent': 'OSRS Market Watch Tool - mrserious8985' }
                 });
                 if (!liveResponse.ok) throw new Error("GE price server failed.");
                 const livePayload = await liveResponse.json();
@@ -272,7 +272,7 @@
                 for (const item of userDatabase.slayerLoot) {
                     try {
                         const tsResponse = await fetch(`https://prices.runescape.wiki/api/v1/osrs/timeseries?id=${item.id}&timestep=${timestep}`, {
-                            headers: { 'User-Agent': 'OSRS Market Watch Tool - DashboardEngine' }
+                            headers: { 'User-Agent': 'OSRS Market Watch Tool - mrserious8985' }
                         });
                         if (tsResponse.ok) {
                             const tsPayload = await tsResponse.json();
