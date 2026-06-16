@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSRS GE Market Watch & Investment Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Custom scrollbar to keep it looking clean */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-6 mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">
+                    ⚔️ OSRS Market Assistant
+                </h1>
+                <p class="text-gray-400 text-sm mt-1">Live analysis mapped against historical baselines and portfolio entry margins.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
+                    Status: Stale
+                </span>
+                <button onclick="fetchLivePrices()" class="bg-amber-600 hover:bg-amber-500 text-gray-900 font-bold px-4 py-2 rounded shadow transition-all transform active:scale-95 text-sm">
+                    🔄 Refresh Prices
+                </button>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 space-y-8">
+                
+                <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
+                    <div class="mb-4">
+                        <h2 class="text-xl font-bold text-amber-400">Drop Logistics (Slayer Loot Timing)</h2>
+                        <p class="text-xs text-gray-400">Calculates value based on real-time instant-buy/sell boundaries to judge market saturation.</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
+                                    <th class="pb-3">Item</th>
+                                    <th class="pb-3 text-right">Instant Sell (Low)</th>
+                                    <th class="pb-3 text-right">Instant Buy (High)</th>
+                                    <th class="pb-3 text-center">Action Target</th>
+                                </tr>
+                            </thead>
+                            <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/50 text-sm">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
+                    <div class="mb-4">
+                        <h2 class="text-xl font-bold text-cyan-400">Long-Term Investment Ledger</h2>
+                        <p class="text-xs text-gray-400">Tracks performance directly against your custom purchase averages, incorporating the 1% GE tax automatically.</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
+                                    <th class="pb-3">Investment Name</th>
+                                    <th class="pb-3 text-right">Avg Buy Price</th>
+                                    <th class="pb-3 text-right">Current Price</th>
+                                    <th class="pb-3 text-right">Post-Tax ROI</th>
+                                    <th class="pb-3 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="investment-rows" class="divide-y divide-gray-700/50 text-sm">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gradient-to-b from-gray-800 to-gray-850 border border-amber-600/30 rounded-xl p-6 shadow-2xl sticky top-6">
+                    <h3 class="text-lg font-bold text-amber-500 border-b border-gray-700 pb-3 mb-4 flex items-center gap-2">
+                        📋 Operational Guidance
+                    </h3>
+                    
+                    <div class="space-y-4 text-sm text-gray-300">
+                        <p>This layout runs on custom logical conditions evaluating asset positions relative to their designated tracking baselines:</p>
+                        
+                        <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">STRONG SELL</span>
+                            <p class="text-xs text-gray-400 mt-1">Item is trading in its upper variance band (above 70% bounds or hitting target criteria). Cash out.</p>
+                        </div>
+
+                        <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800">HOLD & WAIT</span>
+                            <p class="text-xs text-gray-400 mt-1">Values are suppressed near historical floors or currently yielding negative investment yields. Store in bank.</p>
+                        </div>
+
+                        <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-700">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-600">NEUTRAL</span>
+                            <p class="text-xs text-gray-400 mt-1">Fluctuating inside standard parameters. Safe to process if fluid cash is needed for upgrades.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-700 text-xs text-gray-500">
+                        * Formulas evaluate positions via:<br>
+                        $$\text{Position \%} = \frac{\text{Current} - \text{Floor}}{\text{Ceiling} - \text{Floor}} \times 100$$
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // CONFIGURATION: Set up your items and custom target thresholds here
+        const CONFIG = {
+            // High-volume monster drops with historical thresholds for decision logic
+            slayerLoot: [
+                { id: 4151, name: "Abyssal Whip", floor: 1050000, ceiling: 1350000 },
+                { id: 536, name: "Dragon Bones", floor: 2600, ceiling: 3100 },
+                { id: 12934, name: "Zulrah Scales", floor: 150, ceiling: 210 },
+                { id: 565, name: "Blood Rune", floor: 190, ceiling: 240 }
+            ],
+            // Personal investments containing your raw customized buying entry levels
+            investments: [
+                { id: 13190, name: "Old School Bond", entryCost: 11500000, exitTarget: 16000000 },
+                { id: 2577, name: "Ranger Boots", entryCost: 38000000, exitTarget: 42000000 },
+                { id: 2 border: 2, id: 2, name: "Cannonball", entryCost: 145, exitTarget: 185 }
+            ]
+        };
+
+        // Utility: Clean looking GP numbers
+        function formatGP(num) {
+            if (!num) return "0";
+            return num.toLocaleString();
+        }
+
+        // Main logic to asynchronously hit API and refresh view structures
+        async function fetchLivePrices() {
+            const syncIndicator = document.getElementById("sync-indicator");
+            syncIndicator.innerText = "Fetching...";
+            syncIndicator.className = "text-xs bg-amber-950 text-amber-400 px-3 py-1.5 rounded-md border border-amber-800 animate-pulse";
+
+            // Extract distinct IDs to clean network payloads
+            const targetIds = [...CONFIG.slayerLoot.map(i => i.id), ...CONFIG.investments.map(i => i.id)];
+            
+            try {
+                // Fetch to the public OSRS Wiki API. Custom User-Agent prevents 403 blocks.
+                const response = await fetch("https://prices.runescape.wiki/api/v1/osrs/latest", {
+                    headers: {
+                        'User-Agent': 'Personal Slayer & Investment Tracker Dashboard Boilerplate - DevContact'
+                    }
+                });
+                
+                if (!response.ok) throw new Error("API Blocked or Down");
+                const apiPayload = await response.json();
+                const currentData = apiPayload.data;
+
+                // Process Elements
+                renderSlayerLoot(currentData);
+                renderInvestments(currentData);
+
+                // Reset Status text
+                const now = new Date();
+                syncIndicator.innerText = `Synced: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                syncIndicator.className = "text-xs bg-emerald-950 text-emerald-400 px-3 py-1.5 rounded-md border border-emerald-900";
+
+            } catch (error) {
+                console.error(error);
+                syncIndicator.innerText = "Sync Failed";
+                syncIndicator.className = "text-xs bg-rose-950 text-rose-400 px-3 py-1.5 rounded-md border border-rose-900";
+            }
+        }
+
+        function renderSlayerLoot(marketData) {
+            const container = document.getElementById("slayer-loot-rows");
+            container.innerHTML = "";
+
+            CONFIG.slayerLoot.forEach(item => {
+                const live = marketData[item.id];
+                // Handle edge case if item has zero trade volume in immediate minute tick
+                const currentSell = live ? live.low : 0; 
+                const currentBuy = live ? live.high : 0; 
+                
+                // Mathematical index of where price sits in variance range
+                const rangeGap = item.ceiling - item.floor;
+                const positionPct = rangeGap > 0 ? ((currentSell - item.floor) / rangeGap) * 100 : 50;
+
+                let actionLabel = "NEUTRAL";
+                let colorClass = "bg-gray-700 text-gray-300 border-gray-600";
+
+                if (positionPct <= 30) {
+                    actionLabel = "HOLD & WAIT";
+                    colorClass = "bg-amber-950 text-amber-400 border-amber-800";
+                } else if (positionPct >= 70) {
+                    actionLabel = "STRONG SELL";
+                    colorClass = "bg-emerald-950 text-emerald-400 border-emerald-800";
+                }
+
+                container.innerHTML += `
+                    <tr class="hover:bg-gray-700/30 transition-colors">
+                        <td class="py-4 font-medium text-gray-200">${item.name}</td>
+                        <td class="py-4 text-right font-mono">${formatGP(currentSell)} GP</td>
+                        <td class="py-4 text-right font-mono text-gray-400">${formatGP(currentBuy)} GP</td>
+                        <td class="py-4 text-center">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-md border ${colorClass}">
+                                ${actionLabel}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderInvestments(marketData) {
+            const container = document.getElementById("investment-rows");
+            container.innerHTML = "";
+
+            CONFIG.investments.forEach(item => {
+                const live = marketData[item.id];
+                const currentPrice = live ? live.high : 0;
+
+                // Account for the official 1% Grand Exchange Tax on selling operations
+                const netRevenue = currentPrice * 0.99;
+                const netProfitPerUnit = netRevenue - item.entryCost;
+                const roiPercentage = ((netProfitPerUnit / item.entryCost) * 100).toFixed(1);
+
+                let actionLabel = "HOLD";
+                let badgeColor = "bg-amber-950 text-amber-400 border-amber-800";
+
+                if (currentPrice >= item.exitTarget) {
+                    actionLabel = "TAKE PROFIT";
+                    badgeColor = "bg-emerald-950 text-emerald-400 border-emerald-800";
+                } else if (roiPercentage < 0) {
+                    actionLabel = "UNDERWATER";
+                    badgeColor = "bg-rose-950 text-rose-400 border-rose-900";
+                }
+
+                const roiSign = roiPercentage > 0 ? '+' : '';
+                const roiColor = roiPercentage >= 0 ? 'text-emerald-400' : 'text-rose-400';
+
+                container.innerHTML += `
+                    <tr class="hover:bg-gray-700/30 transition-colors">
+                        <td class="py-4 font-medium text-gray-200">${item.name}</td>
+                        <td class="py-4 text-right font-mono text-gray-400">${formatGP(item.entryCost)} GP</td>
+                        <td class="py-4 text-right font-mono">${formatGP(currentPrice)} GP</td>
+                        <td class="py-4 text-right font-mono font-bold ${roiColor}">${roiSign}${roiPercentage}%</td>
+                        <td class="py-4 text-center">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-md border ${badgeColor}">
+                                ${actionLabel}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Boot-up Execution Loop
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchLivePrices();
+            // Automatically loop/poll refresh sequences silently every 60 seconds
+            setInterval(fetchLivePrices, 60000);
+        });
+    </script>
+</body>
+</html>
