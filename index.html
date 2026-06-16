@@ -20,7 +20,7 @@
                 <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">
                     ⚔️ OSRS GE Market Watch
                 </h1>
-                <p class="text-gray-400 text-sm mt-1">Track your banked drops against multiple historical windows to time your bulk liquidations perfectly.</p>
+                <p class="text-gray-400 text-sm mt-1">Track your banked drops against multiple historical windows with built-in volume breakout protection.</p>
             </div>
             <div class="flex items-center gap-3">
                 <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
@@ -38,7 +38,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
                         <h2 class="text-xl font-bold text-amber-400">High Volume Items (Ores, Gems, Hides, Bones)</h2>
-                        <p class="text-xs text-gray-400">Compare today's instant-sell price against your chosen historical window to see if it's a good time to sell.</p>
+                        <p class="text-xs text-gray-400">Compare today's instant-sell price against your chosen historical window. Breaks past ceilings trigger automated volume protection.</p>
                     </div>
                     
                     <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-700 self-end sm:self-auto">
@@ -55,7 +55,7 @@
                                 <th class="pb-3">Item Name</th>
                                 <th class="pb-3 text-right" id="lbl-low-heading">7-Day Historical Low</th>
                                 <th class="pb-3 text-right" id="lbl-high-heading">7-Day Historical High</th>
-                                <th class="pb-3 text-right">Today's Instant Sell Price</th>
+                                <th class="pb-3 text-right">Today's Price</th>
                                 <th class="pb-3 text-center">Is Now A Good Time To Sell?</th>
                                 <th class="pb-3 text-center">Actions</th>
                             </tr>
@@ -178,7 +178,7 @@
         let userDatabase = { slayerLoot: [], investments: [] };
         let itemDictionary = null; 
         let rawLivePrices = null; 
-        let currentTimeframe = 7; // Global context flag: tracks 7, 30, or 90 days
+        let currentTimeframe = 7; 
 
         async function initApp() {
             const localData = localStorage.getItem("osrs_dashboard_db");
@@ -204,8 +204,6 @@
 
         function setTimeframe(days) {
             currentTimeframe = days;
-            
-            // Update physical button styles to represent focused element
             const btns = { 7: "btn-7d", 30: "btn-30d", 90: "btn-90d" };
             Object.keys(btns).forEach(d => {
                 const el = document.getElementById(btns[d]);
@@ -216,20 +214,18 @@
                 }
             });
 
-            // Swap out column titles dynamically
             document.getElementById("lbl-low-heading").innerText = `${days}-Day Historical Low`;
             document.getElementById("lbl-high-heading").innerText = `${days}-Day Historical High`;
 
-            // Run table calculations immediately using the loaded price models
             fetchLivePrices();
         }
 
         async function fetchItemDictionary() {
             try {
                 const response = await fetch("https://prices.runescape.wiki/api/v1/osrs/mapping", {
-                    headers: { 'User-Agent': 'OSRS Market Watch Tool - DashboardEngine' }
+                    headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
                 });
-                if (!response.ok) throw new Error("Could not pull cross-reference mapping tables.");
+                if (!response.ok) throw new Error("Could not pull mapping cross-references.");
                 const mappingArray = await response.json();
                 
                 itemDictionary = {};
@@ -237,42 +233,35 @@
                     itemDictionary[item.name.toLowerCase().trim()] = item.id;
                 });
             } catch (err) {
-                console.error("Mapping failure:", err);
-                document.getElementById("sync-indicator").innerText = "Dictionary Init Failure";
+                console.error(err);
+                document.getElementById("sync-indicator").innerText = "Dictionary Failure";
             }
         }
 
         async function fetchLivePrices() {
             const syncIndicator = document.getElementById("sync-indicator");
-            syncIndicator.innerText = "Recalculating Windows...";
+            syncIndicator.innerText = "Analyzing Volumes & Prices...";
             
             try {
-                // 1. Fetch live price layout snapshots
+                // 1. Fetch current live prices
                 const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/latest", {
-                    headers: { 'User-Agent': 'OSRS Market Watch Tool - mrserious8985' }
+                    headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
                 });
-                if (!liveResponse.ok) throw new Error("GE price server failed.");
                 const livePayload = await liveResponse.json();
                 rawLivePrices = livePayload.data; 
 
-                // 2. Resolve parameters for endpoint selection depending on user toggle state
-                let timestep = "1h"; // 7 days context window choice
-                let recordsToSlice = -168; // 24 records/day * 7 days = 168 rows
-                
-                if (currentTimeframe === 30) {
-                    timestep = "6h"; // 30 days context window choice
-                    recordsToSlice = -120; // 4 records/day * 30 days = 120 rows
-                } else if (currentTimeframe === 90) {
-                    timestep = "24h"; // 90 days context window choice
-                    recordsToSlice = -90; // 1 record/day * 90 days = 90 rows
-                }
+                // 2. Determine timeframe properties
+                let timestep = "1h"; 
+                let recordsToSlice = -168; 
+                if (currentTimeframe === 30) { timestep = "6h"; recordsToSlice = -120; }
+                else if (currentTimeframe === 90) { timestep = "24h"; recordsToSlice = -90; }
 
-                // 3. Loop and gather history blocks for each High Volume item sequentially
+                // 3. Process timeseries data
                 const historicalRecords = {};
                 for (const item of userDatabase.slayerLoot) {
                     try {
                         const tsResponse = await fetch(`https://prices.runescape.wiki/api/v1/osrs/timeseries?id=${item.id}&timestep=${timestep}`, {
-                            headers: { 'User-Agent': 'OSRS Market Watch Tool - mrserious8985' }
+                            headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
                         });
                         if (tsResponse.ok) {
                             const tsPayload = await tsResponse.json();
@@ -280,14 +269,21 @@
                             
                             const lows = slicedHistory.map(d => d.avgLowPrice).filter(p => p !== null && p > 0);
                             const highs = slicedHistory.map(d => d.avgHighPrice).filter(p => p !== null && p > 0);
+                            const volumes = slicedHistory.map(d => d.lowPriceVolume + d.highPriceVolume).filter(v => v > 0);
+
+                            // Calculate baseline rolling volume average to spot spikes
+                            const totalVol = volumes.reduce((sum, v) => sum + v, 0);
+                            const baseAvgVolume = volumes.length ? (totalVol / volumes.length) : 0;
 
                             historicalRecords[item.id] = {
                                 min: lows.length ? Math.min(...lows) : null,
-                                max: highs.length ? Math.max(...highs) : null
+                                max: highs.length ? Math.max(...highs) : null,
+                                avgVolume: baseAvgVolume,
+                                recentVolume: volumes.length ? volumes[volumes.length - 1] : 0
                             };
                         }
                     } catch (e) {
-                        console.error(`History query failed for object ID: ${item.id}`, e);
+                        console.error(e);
                     }
                 }
                 
@@ -300,7 +296,7 @@
                 syncIndicator.className = "text-xs bg-emerald-950 text-emerald-400 px-3 py-1.5 rounded-md border border-emerald-900";
             } catch (err) {
                 console.error(err);
-                syncIndicator.innerText = "Price Synchronizer Error";
+                syncIndicator.innerText = "Sync Error";
                 syncIndicator.className = "text-xs bg-rose-950 text-rose-400 px-3 py-1.5 rounded-md border border-rose-900";
             }
         }
@@ -324,18 +320,27 @@
                 const rangeGap = marketHigh - marketLow;
                 const positionPct = rangeGap > 0 ? ((currentSell - marketLow) / rangeGap) * 100 : 50;
 
+                // BREAKOUT SHIELD: Check if immediate volume exceeds rolling base standards by over 50%
+                const volumeIsSpiking = hist && hist.recentVolume > (hist.avgVolume * 1.5);
+                const priceIsAtCeiling = positionPct >= 85;
+
                 let stateLabel = "NEUTRAL";
                 let badgeStyle = "bg-gray-700 text-gray-300 border-gray-600";
                 let tooltipText = "Trading comfortably within its normal baseline parameters.";
 
-                if (positionPct <= 30) {
+                if (priceIsAtCeiling && volumeIsSpiking) {
+                    // THE SHIELD TRIGGER: Price is at a peak, but massive trade volume means a real breakout surge is active
+                    stateLabel = "⚡ BREAKOUT (HOLD)";
+                    badgeStyle = "bg-cyan-950 text-cyan-400 border-cyan-700 animate-pulse";
+                    tooltipText = "CRITICAL ALERT: Price is breaking past high bounds accompanied by massive surge volume! A major update or bot ban is likely active. DO NOT SELL yet—ride the wave upward.";
+                } else if (positionPct <= 30) {
                     stateLabel = "HOLD & WAIT";
                     badgeStyle = "bg-amber-950 text-amber-400 border-amber-800";
                     tooltipText = "Price is scraping the bottom of its current window scope. Keep hoarding this item in your bank tab.";
                 } else if (positionPct >= 70) {
                     stateLabel = "STRONG SELL";
                     badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
-                    tooltipText = "Price is pushing near the peak ceiling of its current window scope! Excellent time to dump your stack.";
+                    tooltipText = "Price is pushing near the peak ceiling on stable volume. Normal historical high. Great time to dump your stacks.";
                 }
 
                 target.innerHTML += `
@@ -373,9 +378,7 @@
                 if (live) {
                     if (live.high > 0 && live.low > 0) {
                         currentPrice = Math.round((live.high + live.low) / 2);
-                    } else {
-                        currentPrice = live.high || live.low || 0;
-                    }
+                    } else { currentPrice = live.high || live.low || 0; }
                 }
 
                 const revenueNet = currentPrice * 0.99;
@@ -435,7 +438,6 @@
 
                 const buyPrice = live.low;    
                 const sellPrice = live.high;  
-
                 const grossSpread = sellPrice - buyPrice;
                 const taxPaid = Math.floor(sellPrice * 0.01); 
                 const netProfitPerUnit = grossSpread - taxPaid;
@@ -462,16 +464,16 @@
             const category = document.getElementById("input-category").value;
 
             if (!rawName) return alert("Please type an item name.");
-            if (!itemDictionary || !rawLivePrices) return alert("Still loading price data. Try again in a second.");
+            if (!itemDictionary || !rawLivePrices) return alert("Still loading data. Try again in a second.");
 
             const matchedId = itemDictionary[rawName.toLowerCase()];
-            if (!matchedId) return alert(`Could not find "${rawName}". Check spelling to match game precisely.`);
+            if (!matchedId) return alert(`Could not find "${rawName}". Check spelling.`);
 
             if (category === "slayer") {
                 userDatabase.slayerLoot.push({ id: matchedId, name: rawName });
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
-                if (isNaN(entryVal) || entryVal <= 0) return alert("Please enter what you paid for the item.");
+                if (isNaN(entryVal) || entryVal <= 0) return alert("Please enter your purchase price.");
 
                 const calculatedExit = Math.round(entryVal * 1.12);
                 userDatabase.investments.push({ id: matchedId, name: rawName, entryCost: entryVal, exitTarget: calculatedExit });
@@ -484,11 +486,8 @@
         }
 
         function deleteAsset(type, index) {
-            if (type === "slayer") {
-                userDatabase.slayerLoot.splice(index, 1);
-            } else {
-                userDatabase.investments.splice(index, 1);
-            }
+            if (type === "slayer") { userDatabase.slayerLoot.splice(index, 1); }
+            else { userDatabase.investments.splice(index, 1); }
             saveToLocalStorage();
             fetchLivePrices();
         }
