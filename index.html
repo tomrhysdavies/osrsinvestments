@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSRS GE Intelligence Engine</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; }
@@ -16,13 +15,12 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
-        <!-- App Header -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-6 mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">
                     ⚔️ OSRS GE Intelligence Engine
                 </h1>
-                <p class="text-gray-400 text-sm mt-1">Manage High Volume Items and track premium boss unique investments in real-time.</p>
+                <p class="text-gray-400 text-sm mt-1">Manage volume supply logistics, track premium boss unique investments, and identify flipping margins in real-time.</p>
             </div>
             <div class="flex items-center gap-3">
                 <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
@@ -34,10 +32,8 @@
             </div>
         </header>
 
-        <!-- Main Workspace -->
         <main class="space-y-8">
             
-            <!-- SECTION 1: SLAYER HIGH VOLUME LOGISTICS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-amber-400">High Volume Items (Ores, Gems, Hides, Bones)</h2>
@@ -56,13 +52,11 @@
                             </tr>
                         </thead>
                         <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Dynamic Content -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- SECTION 2: HIGH PROFILE INVESTMENT SPECULATION -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-cyan-400">Long Term Investments (Boss / Rare Drops)</h2>
@@ -75,27 +69,47 @@
                                 <th class="pb-3">Unique Item Name</th>
                                 <th class="pb-3 text-right">Avg Entry Price</th>
                                 <th class="pb-3 text-right">Target Exit</th>
-                                <th class="pb-3 text-right">Live Price</th>
+                                <th class="pb-3 text-right">Live Price (Mid)</th>
                                 <th class="pb-3 text-right">Net ROI %</th>
                                 <th class="pb-3 text-center">Position Status</th>
                                 <th class="pb-3 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="investment-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Dynamic Content -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- SECTION 3: REAL-TIME MANAGEMENT CONSOLE -->
+            <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-emerald-400">Live Quick-Flipping Radar</h2>
+                    <p class="text-xs text-gray-400">Real-time spreads for rapid margin trading. Buy at Low, Sell at High (Factoring 1% GE Tax on all items).</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
+                                <th class="pb-3">Item Name</th>
+                                <th class="pb-3 text-right">Your Buy Offer (Low)</th>
+                                <th class="pb-3 text-right">Your Sell Offer (High)</th>
+                                <th class="pb-3 text-right">Gross Spread</th>
+                                <th class="pb-3 text-right">Net Profit / Unit</th>
+                                <th class="pb-3 text-center">ROI %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <h2 class="text-lg font-bold text-gray-200 mb-4 flex items-center gap-2">
-                    🛠️ Asset Management Console
+                    🛠 shrink-0 Asset Management Console
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
-                    <!-- Search & Data Resolver Form -->
                     <div class="md:col-span-2 bg-gray-900/50 p-4 rounded-lg border border-gray-700 space-y-4">
                         <h3 class="text-sm font-semibold text-gray-300">Add or Edit Monitored Asset</h3>
                         
@@ -107,13 +121,12 @@
                             <div>
                                 <label class="block text-xs text-gray-400 mb-1">Tracking Category</label>
                                 <select id="input-category" onchange="toggleFormFields()" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
-                                    <option value="slayer">High Volume Items (Slayer Drops)</option>
+                                    <option value="slayer">Volume Supply Logistics (Slayer Drops)</option>
                                     <option value="investment">Premium Speculation (Boss Uniques)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Fields dynamically swapping depending on tracking intent -->
                         <div id="fields-slayer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs text-gray-400 mb-1">Historical Floor Price (GP)</label>
@@ -141,7 +154,6 @@
                         </button>
                     </div>
 
-                    <!-- Reset / Debug Tools -->
                     <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col justify-between">
                         <div>
                             <h3 class="text-sm font-semibold text-gray-300 mb-2">Database Controls</h3>
@@ -173,7 +185,7 @@
         };
 
         let userDatabase = { slayerLoot: [], investments: [] };
-        let itemDictionary = null; // Compiled map from OSRS Wiki to resolve strings to IDs
+        let itemDictionary = null; 
 
         // Load configuration and fire system requests
         async function initApp() {
@@ -208,7 +220,6 @@
                 if (!response.ok) throw new Error("Could not pull cross-reference mapping tables.");
                 const mappingArray = await response.json();
                 
-                // Index mapped arrays into quick hash lookups normalized to lowercase formats
                 itemDictionary = {};
                 mappingArray.forEach(item => {
                     itemDictionary[item.name.toLowerCase().trim()] = item.id;
@@ -232,6 +243,7 @@
                 
                 renderSlayerTable(payload.data);
                 renderInvestmentTable(payload.data);
+                renderFlippingRadar(payload.data);
 
                 const now = new Date();
                 syncIndicator.innerText = `Synced: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
@@ -249,7 +261,12 @@
 
             userDatabase.slayerLoot.forEach((item, index) => {
                 const live = prices[item.id];
-                const currentSell = live ? live.low : 0;
+                
+                // Low Volume Fallback Rule applied here
+                let currentSell = 0;
+                if (live) {
+                    currentSell = (live.low > 0) ? live.low : (live.high || 0);
+                }
 
                 const positionPct = (item.ceiling - item.floor) > 0 ? ((currentSell - item.floor) / (item.ceiling - item.floor)) * 100 : 50;
 
@@ -287,7 +304,16 @@
 
             userDatabase.investments.forEach((item, index) => {
                 const live = prices[item.id];
-                const currentPrice = live ? live.high : 0;
+                
+                // Mid-Market Average Fallback rule applied to prevent 0-value bugs on low volume drops
+                let currentPrice = 0;
+                if (live) {
+                    if (live.high > 0 && live.low > 0) {
+                        currentPrice = Math.round((live.high + live.low) / 2);
+                    } else {
+                        currentPrice = live.high || live.low || 0;
+                    }
+                }
 
                 const revenueNet = currentPrice * 0.99;
                 const profitNet = revenueNet - item.entryCost;
@@ -320,6 +346,40 @@
                         <td class="py-3 text-center">
                             <button onclick="deleteAsset('investment', ${index})" class="text-xs text-rose-400 hover:text-rose-300 hover:underline">Remove</button>
                         </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderFlippingRadar(prices) {
+            const target = document.getElementById("flipping-radar-rows");
+            target.innerHTML = "";
+
+            // Combines and prints metrics for all tracked items
+            const allTrackedItems = [...userDatabase.slayerLoot, ...userDatabase.investments];
+
+            allTrackedItems.forEach(item => {
+                const live = prices[item.id];
+                if (!live || !live.high || !live.low) return;
+
+                const buyPrice = live.low;    
+                const sellPrice = live.high;  
+
+                const grossSpread = sellPrice - buyPrice;
+                const taxPaid = Math.floor(sellPrice * 0.01); 
+                const netProfitPerUnit = grossSpread - taxPaid;
+                const roi = ((netProfitPerUnit / buyPrice) * 100).toFixed(2);
+
+                const performanceColor = netProfitPerUnit > 0 ? "text-emerald-400" : "text-rose-400";
+
+                target.innerHTML += `
+                    <tr class="hover:bg-gray-700/20 transition-colors">
+                        <td class="py-3 font-semibold text-gray-200">${item.name}</td>
+                        <td class="py-3 text-right font-mono text-emerald-500 font-bold">${buyPrice.toLocaleString()} GP</td>
+                        <td class="py-3 text-right font-mono text-orange-400">${sellPrice.toLocaleString()} GP</td>
+                        <td class="py-3 text-right font-mono text-gray-400">${grossSpread.toLocaleString()} GP</td>
+                        <td class="py-3 text-right font-mono font-bold ${performanceColor}">${netProfitPerUnit.toLocaleString()} GP</td>
+                        <td class="py-3 text-center font-mono font-bold ${performanceColor}">${roi}%</td>
                     </tr>
                 `;
             });
