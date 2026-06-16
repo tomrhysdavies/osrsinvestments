@@ -4,28 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSRS GE Market Watch</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #1f2937; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
-        
-        /* Tooltip hover utilities */
-        .group:hover .group-hover\:flex { display: flex; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
-        <!-- App Header -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-6 mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-amber-500 tracking-wide flex items-center gap-2">
                     ⚔️ OSRS GE Market Watch
                 </h1>
-                <p class="text-gray-400 text-sm mt-1">Track high-volume material values against recent baselines to time your bulk sales perfectly.</p>
+                <p class="text-gray-400 text-sm mt-1">Track your banked drops against multiple historical windows to time your bulk liquidations perfectly.</p>
             </div>
             <div class="flex items-center gap-3">
                 <span id="sync-indicator" class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
@@ -37,35 +32,40 @@
             </div>
         </header>
 
-        <!-- Main Workspace -->
         <main class="space-y-8">
             
-            <!-- SECTION 1: HIGH VOLUME ITEMS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
-                <div class="mb-4">
-                    <h2 class="text-xl font-bold text-amber-400">High Volume Items (Ores, Gems, Hides, Bones)</h2>
-                    <p class="text-xs text-gray-400">Compares today's instant-sell price directly against its recent historical trading boundaries to time your bulk stack dumps.</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-amber-400">High Volume Items (Ores, Gems, Hides, Bones)</h2>
+                        <p class="text-xs text-gray-400">Compare today's instant-sell price against your chosen historical window to see if it's a good time to sell.</p>
+                    </div>
+                    
+                    <div class="flex bg-gray-950 p-1 rounded-lg border border-gray-700 self-end sm:self-auto">
+                        <button id="btn-7d" onclick="setTimeframe(7)" class="px-3 py-1 text-xs font-bold rounded transition-colors bg-amber-600 text-gray-900">7 Days</button>
+                        <button id="btn-30d" onclick="setTimeframe(30)" class="px-3 py-1 text-xs font-bold rounded transition-colors text-gray-400 hover:text-gray-200">30 Days</button>
+                        <button id="btn-90d" onclick="setTimeframe(90)" class="px-3 py-1 text-xs font-bold rounded transition-colors text-gray-400 hover:text-gray-200">90 Days</button>
+                    </div>
                 </div>
+                
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                                 <th class="pb-3">Item Name</th>
-                                <th class="pb-3 text-right">Recent Market Low</th>
-                                <th class="pb-3 text-right">Recent Market High</th>
+                                <th class="pb-3 text-right" id="lbl-low-heading">7-Day Historical Low</th>
+                                <th class="pb-3 text-right" id="lbl-high-heading">7-Day Historical High</th>
                                 <th class="pb-3 text-right">Today's Instant Sell Price</th>
                                 <th class="pb-3 text-center">Is Now A Good Time To Sell?</th>
                                 <th class="pb-3 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="slayer-loot-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Dynamic Content -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- SECTION 2: LONG TERM INVESTMENTS -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-cyan-400">Long Term Investments (Boss / Rare Drops)</h2>
@@ -85,13 +85,11 @@
                             </tr>
                         </thead>
                         <tbody id="investment-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Dynamic Content -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- SECTION 3: LIVE QUICK-FLIPPING RADAR -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-emerald-400">Live Quick-Flipping Radar</h2>
@@ -110,13 +108,11 @@
                             </tr>
                         </thead>
                         <tbody id="flipping-radar-rows" class="divide-y divide-gray-700/50 text-sm">
-                            <!-- Dynamic Content -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- SECTION 4: ADD ITEMS TO WATCHLIST -->
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <h2 class="text-lg font-bold text-gray-200 mb-4 flex items-center gap-2">
                     🛠️ Add Items to Watchlist
@@ -166,7 +162,6 @@
     </div>
 
     <script>
-        // Seed configuration templates containing IDs and core properties
         const INITIAL_SEED = {
             slayerLoot: [
                 { id: 451, name: "Runite Ore" },
@@ -183,6 +178,7 @@
         let userDatabase = { slayerLoot: [], investments: [] };
         let itemDictionary = null; 
         let rawLivePrices = null; 
+        let currentTimeframe = 7; // Global context flag: tracks 7, 30, or 90 days
 
         async function initApp() {
             const localData = localStorage.getItem("osrs_dashboard_db");
@@ -206,10 +202,32 @@
             document.getElementById("fields-investment").classList.toggle("hidden", category !== "investment");
         }
 
+        function setTimeframe(days) {
+            currentTimeframe = days;
+            
+            // Update physical button styles to represent focused element
+            const btns = { 7: "btn-7d", 30: "btn-30d", 90: "btn-90d" };
+            Object.keys(btns).forEach(d => {
+                const el = document.getElementById(btns[d]);
+                if (parseInt(d) === days) {
+                    el.className = "px-3 py-1 text-xs font-bold rounded transition-colors bg-amber-600 text-gray-900";
+                } else {
+                    el.className = "px-3 py-1 text-xs font-bold rounded transition-colors text-gray-400 hover:text-gray-200";
+                }
+            });
+
+            // Swap out column titles dynamically
+            document.getElementById("lbl-low-heading").innerText = `${days}-Day Historical Low`;
+            document.getElementById("lbl-high-heading").innerText = `${days}-Day Historical High`;
+
+            // Run table calculations immediately using the loaded price models
+            fetchLivePrices();
+        }
+
         async function fetchItemDictionary() {
             try {
                 const response = await fetch("https://prices.runescape.wiki/api/v1/osrs/mapping", {
-                    headers: { 'User-Agent': 'OSRS Market Assistant - TimingDashboard' }
+                    headers: { 'User-Agent': 'OSRS Market Watch Tool - DashboardEngine' }
                 });
                 if (!response.ok) throw new Error("Could not pull cross-reference mapping tables.");
                 const mappingArray = await response.json();
@@ -226,28 +244,54 @@
 
         async function fetchLivePrices() {
             const syncIndicator = document.getElementById("sync-indicator");
-            syncIndicator.innerText = "Querying Live Prices...";
+            syncIndicator.innerText = "Recalculating Windows...";
             
             try {
-                // Fetch current snapshot values
+                // 1. Fetch live price layout snapshots
                 const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/latest", {
-                    headers: { 'User-Agent': 'OSRS Market Assistant - TimingDashboard' }
+                    headers: { 'User-Agent': 'OSRS Market Watch Tool - DashboardEngine' }
                 });
                 if (!liveResponse.ok) throw new Error("GE price server failed.");
                 const livePayload = await liveResponse.json();
                 rawLivePrices = livePayload.data; 
 
-                // Fetch true recent historical boundaries (24 Hour Volume Context windows)
-                const histResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/24h", {
-                    headers: { 'User-Agent': 'OSRS Market Assistant - TimingDashboard' }
-                });
-                let historyData = {};
-                if (histResponse.ok) {
-                    const histPayload = await histResponse.json();
-                    historyData = histPayload.data;
+                // 2. Resolve parameters for endpoint selection depending on user toggle state
+                let timestep = "1h"; // 7 days context window choice
+                let recordsToSlice = -168; // 24 records/day * 7 days = 168 rows
+                
+                if (currentTimeframe === 30) {
+                    timestep = "6h"; // 30 days context window choice
+                    recordsToSlice = -120; // 4 records/day * 30 days = 120 rows
+                } else if (currentTimeframe === 90) {
+                    timestep = "24h"; // 90 days context window choice
+                    recordsToSlice = -90; // 1 record/day * 90 days = 90 rows
+                }
+
+                // 3. Loop and gather history blocks for each High Volume item sequentially
+                const historicalRecords = {};
+                for (const item of userDatabase.slayerLoot) {
+                    try {
+                        const tsResponse = await fetch(`https://prices.runescape.wiki/api/v1/osrs/timeseries?id=${item.id}&timestep=${timestep}`, {
+                            headers: { 'User-Agent': 'OSRS Market Watch Tool - DashboardEngine' }
+                        });
+                        if (tsResponse.ok) {
+                            const tsPayload = await tsResponse.json();
+                            const slicedHistory = tsPayload.data.slice(recordsToSlice);
+                            
+                            const lows = slicedHistory.map(d => d.avgLowPrice).filter(p => p !== null && p > 0);
+                            const highs = slicedHistory.map(d => d.avgHighPrice).filter(p => p !== null && p > 0);
+
+                            historicalRecords[item.id] = {
+                                min: lows.length ? Math.min(...lows) : null,
+                                max: highs.length ? Math.max(...highs) : null
+                            };
+                        }
+                    } catch (e) {
+                        console.error(`History query failed for object ID: ${item.id}`, e);
+                    }
                 }
                 
-                renderSlayerTable(rawLivePrices, historyData);
+                renderSlayerTable(rawLivePrices, historicalRecords);
                 renderInvestmentTable(rawLivePrices);
                 renderFlippingRadar(rawLivePrices);
 
@@ -274,26 +318,24 @@
                     currentSell = (live.low > 0) ? live.low : (live.high || 0);
                 }
 
-                // Dynamically resolve actual recent market extremes straight from the Wiki history payload
-                // Fall back to clean default variance boundaries if a specific item history is dropped by network ticks
-                const marketLow = hist && hist.lowPriceAvg ? hist.lowPriceAvg : Math.round(currentSell * 0.95);
-                const marketHigh = hist && hist.highPriceAvg ? hist.highPriceAvg : Math.round(currentSell * 1.05);
+                const marketLow = hist && hist.min ? hist.min : Math.round(currentSell * 0.95);
+                const marketHigh = hist && hist.max ? hist.max : Math.round(currentSell * 1.05);
 
                 const rangeGap = marketHigh - marketLow;
                 const positionPct = rangeGap > 0 ? ((currentSell - marketLow) / rangeGap) * 100 : 50;
 
                 let stateLabel = "NEUTRAL";
                 let badgeStyle = "bg-gray-700 text-gray-300 border-gray-600";
-                let tooltipText = "Item is trading within standard parameters. Safe to dump if you need cash immediately, or store it away.";
+                let tooltipText = "Trading comfortably within its normal baseline parameters.";
 
-                if (positionPct <= 35) {
+                if (positionPct <= 30) {
                     stateLabel = "HOLD & WAIT";
                     badgeStyle = "bg-amber-950 text-amber-400 border-amber-800";
-                    tooltipText = "Price is currently suppressed near recent market lows. Avoid selling now; pile these in your bank until supply tightens.";
-                } else if (positionPct >= 65) {
+                    tooltipText = "Price is scraping the bottom of its current window scope. Keep hoarding this item in your bank tab.";
+                } else if (positionPct >= 70) {
                     stateLabel = "STRONG SELL";
                     badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
-                    tooltipText = "Price is peaking near recent historical highs! Demand is high. This is the optimal time to cash out your stacks.";
+                    tooltipText = "Price is pushing near the peak ceiling of its current window scope! Excellent time to dump your stack.";
                 }
 
                 target.innerHTML += `
@@ -303,12 +345,10 @@
                         <td class="py-4 text-right font-mono text-gray-400">${marketHigh.toLocaleString()} GP</td>
                         <td class="py-4 text-right font-mono font-bold text-amber-500">${currentSell.toLocaleString()} GP</td>
                         <td class="py-4 text-center">
-                            <!-- Interactive Tooltip Container -->
                             <div class="relative inline-block group cursor-help">
                                 <span class="text-xs font-bold px-2.5 py-1 rounded border ${badgeStyle}">
                                     ${stateLabel}
                                 </span>
-                                <!-- Floating Tooltip Card -->
                                 <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 hidden group-hover:flex flex-col bg-gray-950 text-gray-200 text-xs rounded-lg p-3 border border-gray-700 shadow-2xl z-50 pointer-events-none">
                                     <p class="font-medium leading-relaxed">${tooltipText}</p>
                                     <div class="w-2 h-2 bg-gray-950 border-r border-b border-gray-700 absolute top-full left-1/2 -translate-x-1/2 -mt-1 rotate-45"></div>
@@ -349,11 +389,11 @@
                 if (currentPrice >= item.exitTarget) {
                     stateLabel = "TAKE PROFIT";
                     badgeStyle = "bg-emerald-950 text-emerald-400 border-emerald-800";
-                    tooltipText = "Asset has breached your targeted exit boundary! Sell now on the GE to realize your net gains.";
+                    tooltipText = "Asset has breached your targeted exit boundary! Sell now to realize your gains.";
                 } else if (roi < 0) {
                     stateLabel = "UNDERWATER";
                     badgeStyle = "bg-rose-950 text-rose-400 border-rose-900";
-                    tooltipText = "Current market value is lower than what you paid for it. Hold steady to avoid taking a loss.";
+                    tooltipText = "Market value is below your purchase cost. Hold steady to avoid a cash loss.";
                 }
 
                 const sign = roi > 0 ? "+" : "";
@@ -428,8 +468,6 @@
             if (!matchedId) return alert(`Could not find "${rawName}". Check spelling to match game precisely.`);
 
             if (category === "slayer") {
-                // No arbitrary bounding math stored here anymore.
-                // Just register the ID; the rendering script queries the live history boundaries dynamically.
                 userDatabase.slayerLoot.push({ id: matchedId, name: rawName });
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
