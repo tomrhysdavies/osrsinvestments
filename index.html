@@ -287,32 +287,34 @@
         }
 
         async function initApp() {
-            const localData = localStorage.getItem("osrs_dashboard_db");
-            if (localData) {
-                userDatabase = JSON.parse(localData);
-                if (!userDatabase.history) userDatabase.history = [];
-                
-                // MIGRATION SHIELD: If your current cache has 4 or fewer high volume entries, automatically 
-                // inject the new 46-item blueprint layout without touching your investments or history ledger.
-                if (!userDatabase.slayerLoot || userDatabase.slayerLoot.length <= 4) {
-                    userDatabase.slayerLoot = [...MASTER_BLUEPRINT_LIST];
-                    saveToLocalStorage();
-                }
-            } else {
-                userDatabase = {
-                    slayerLoot: [...MASTER_BLUEPRINT_LIST],
-                    investments: [
-                        { id: 26219, name: "Osmumten's Fang", qty: 1, entryCost: 18500000, exitTarget: 22000000 },
-                        { id: 25865, name: "Bow of Faerdhinen (Inactive)", qty: 1, entryCost: 92000000, exitTarget: 105000000 }
-                    ],
-                    history: []
-                };
-                saveToLocalStorage();
-            }
-            
-            await fetchItemDictionary();
-            await fetchLivePrices();
+    const localData = localStorage.getItem("osrs_dashboard_db");
+    
+    // 1. Load existing database or initialize default
+    if (localData) {
+        userDatabase = JSON.parse(localData);
+        if (!userDatabase.history) userDatabase.history = [];
+        if (!userDatabase.slayerLoot) userDatabase.slayerLoot = [];
+    } else {
+        userDatabase = {
+            slayerLoot: [...MASTER_BLUEPRINT_LIST],
+            investments: [],
+            history: []
+        };
+    }
+
+    // 2. FORCE-MERGE: Ensure the 46 blueprint items exist in your list.
+    // If an item from the blueprint is missing from your list, append it.
+    MASTER_BLUEPRINT_LIST.forEach(blueprintItem => {
+        const exists = userDatabase.slayerLoot.find(i => i.id === blueprintItem.id);
+        if (!exists) {
+            userDatabase.slayerLoot.push(blueprintItem);
         }
+    });
+
+    saveToLocalStorage();
+    await fetchItemDictionary();
+    await fetchLivePrices();
+}
 
         function saveToLocalStorage() {
             localStorage.setItem("osrs_dashboard_db", JSON.stringify(userDatabase));
