@@ -203,7 +203,7 @@
         async function fetchItemDictionary() {
             try {
                 const response = await fetch("https://prices.runescape.wiki/api/v1/osrs/mapping", {
-                    headers: { 'User-Agent': 'Market Management Asset Interface Builder - DevContact' }
+                    headers: { 'User-Agent': 'Personal Prices Assistant - mrserious8985' }
                 });
                 if (!response.ok) throw new Error("Could not pull cross-reference mapping tables.");
                 const mappingArray = await response.json();
@@ -225,7 +225,7 @@
             
             try {
                 const response = await fetch("https://prices.runescape.wiki/api/v1/osrs/latest", {
-                    headers: { 'User-Agent': 'Market Management Asset Interface Builder - DevContact' }
+                    headers: { 'User-Agent': 'Personal Prices Assistant - mrserious8985' }
                 });
                 if (!response.ok) throw new Error("GE price server failed.");
                 const payload = await response.json();
