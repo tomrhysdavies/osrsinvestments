@@ -99,16 +99,16 @@
 
             <section class="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
                 <div class="mb-4">
-                    <h2 class="text-xl font-bold text-emerald-400">⚡ Global High-Yield Flipping Radar (Top 10 Scalable Slots)</h2>
-                    <p class="text-xs text-gray-400">Calculates true 4-hour buy limits against live margins. Discards low-value junk and ranks opportunities entirely by **Maximum Potential Profit per GE Slot Cap**.</p>
+                    <h2 class="text-xl font-bold text-emerald-400">⚡ Global High-Yield Flipping Radar (Top 10 Smoothed Slots)</h2>
+                    <p class="text-xs text-gray-400">Queries a rolling **5-Minute Moving Average** to eliminate outlier noise. Filters positions by immediate trade momentum ratios, sorting entries entirely by max scalable 4-hour slot profit.</p>
                 </div>
                 <div class="w-full">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-700">
                                 <th class="pb-3">Item Name</th>
-                                <th class="pb-3 text-right">Buy Price (Low)</th>
-                                <th class="pb-3 text-right">Sell Price (High)</th>
+                                <th class="pb-3 text-right">Avg Buy Price (Low)</th>
+                                <th class="pb-3 text-right">Avg Sell Price (High)</th>
                                 <th class="pb-3 text-right">Net Profit / Unit</th>
                                 <th class="pb-3 text-center">4H Limit</th>
                                 <th class="pb-3 text-right text-cyan-400">Max Slot Profit (4H)</th>
@@ -222,7 +222,7 @@
             history: []
         };
 
-        let userDatabase = { slayerLoot: [], investments: [] , history: [] };
+        let userDatabase = { slayerLoot: [], investments: [], history: [] };
         let itemDictionary = null; 
         let rawLivePrices = null; 
         let currentTimeframe = 7; 
@@ -289,7 +289,6 @@
                 const mappingArray = await response.json();
                 itemDictionary = {};
                 mappingArray.forEach(item => { 
-                    // ENHANCEMENT: Store both the trade ID and native 4-hour trade limit on the index registry reference
                     itemDictionary[item.name.trim().toLowerCase()] = {
                         id: item.id,
                         name: item.name.trim(),
@@ -303,11 +302,24 @@
             const syncIndicator = document.getElementById("sync-indicator");
             syncIndicator.innerText = "Analyzing Volumes & Prices...";
             try {
+                // FIXED PRIMARY DATA SOURCING: High Volume tab keeps the standard stable 1-Hour averages dataset
                 const liveResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/1h", {
                     headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
                 });
                 const livePayload = await liveResponse.json();
                 rawLivePrices = livePayload.data; 
+
+                // FIX COUPLING: Outlier Protection now fetches a secondary independent moving average snapshot from /5m path
+                let radarPrices = null;
+                try {
+                    const radarResponse = await fetch("https://prices.runescape.wiki/api/v1/osrs/5m", {
+                        headers: { 'User-Agent': 'OSRS Market Watch Tool - @mrserious8985' }
+                    });
+                    if (radarResponse.ok) {
+                        const radarPayload = await radarResponse.json();
+                        radarPrices = radarPayload.data;
+                    }
+                } catch(e) { console.error("5M buffer stream connection dropped:", e); }
 
                 let timestep = "1h"; let recordsToSlice = -168; 
                 if (currentTimeframe === 30) { timestep = "6h"; recordsToSlice = -120; }
@@ -338,7 +350,7 @@
                 }
                 renderSlayerTable(rawLivePrices, historicalRecords);
                 renderInvestmentTable(rawLivePrices);
-                renderFlippingRadar(rawLivePrices); 
+                renderFlippingRadar(radarPrices || rawLivePrices); // Passes the smoothed 5m metrics arrays safely
                 syncIndicator.innerText = `Synced: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
                 syncIndicator.className = "text-xs bg-emerald-950 text-emerald-400 px-3 py-1.5 rounded-md border border-emerald-900";
             } catch (err) { console.error(err); }
@@ -413,7 +425,7 @@
             });
         }
 
-        // RE-ENGINEERED RADAR MODULE: High-yield algorithmic limit-aware sorter engine
+        // SMOOTHED RADAR MODULE: Incorporates Method B (5M Moving Average Arrays) and Method A (Dynamic Limit-to-Volume filtering)
         function renderFlippingRadar(prices) {
             const target = document.getElementById("flipping-radar-rows"); 
             target.innerHTML = "";
@@ -422,35 +434,34 @@
 
             const candidates = [];
             
-            // Loop through all items loaded into our mapping index registry
             Object.keys(itemDictionary).forEach(keyString => {
                 const itemMeta = itemDictionary[keyString];
                 const liveData = prices[itemMeta.id];
                 
                 if (!liveData || !liveData.avgHighPrice || !liveData.avgLowPrice || !itemMeta.limit) return;
 
-                // 1. DYNAMIC FLUIDITY SCREENING
-                const hourlyVol = (liveData.highPriceVolume || 0) + (liveData.lowPriceVolume || 0);
-                const estimatedDailyVolume = hourlyVol * 24;
-                if (estimatedDailyVolume < 250) return;
+                // LAYER 2 COMPLIANCE: 5-minute trading activity volume must be higher than 5% of the item's total 4-hour buy limit window
+                const immediateFiveMinVolume = (liveData.highPriceVolume || 0) + (liveData.lowPriceVolume || 0);
+                const minimumRequiredMomentum = Math.ceil(itemMeta.limit * 0.05);
+                if (immediateFiveMinVolume < minimumRequiredMomentum) return;
 
                 const buyPrice = liveData.avgLowPrice;
                 const sellPrice = liveData.avgHighPrice;
                 const grossSpread = sellPrice - buyPrice;
                 if (grossSpread <= 0) return;
 
-                // 2. 2% GE TAX PROCESSING CAP DEDUCTION
                 const tax = calculateGETax(sellPrice);
                 const netProfitPerUnit = grossSpread - tax;
                 if (netProfitPerUnit <= 0) return;
 
-                // 3. CAP COMPUTE CALCULATION: Net Profit per item multiplied by total 4-hour buy capacity limit
+                // Calculate total potential yield using the 4-hour buy cap capacity
                 const maxSlotYieldGP = Math.round(netProfitPerUnit * itemMeta.limit);
                 
-                // CRITICAL SIEVE FILTER: Discard low-scale trade lines that cannot generate at least 200k gold per offer cycle
+                // Hide low-scale opportunities that can't generate at least 200,000 GP
                 if (maxSlotYieldGP < 200000) return;
 
                 const totalBuyInCapital = buyPrice * itemMeta.limit;
+                const estimatedDailyVolume = immediateFiveMinVolume * 12 * 24; // Project 5m trends to a 24-hour scope representation
 
                 candidates.push({
                     name: itemMeta.name,
@@ -459,15 +470,15 @@
                     unitProfit: netProfitPerUnit,
                     limit: itemMeta.limit,
                     slotYield: maxSlotYieldGP,
-                    capitalRequired: totalBuyInCapital
+                    capitalRequired: totalBuyInCapital,
+                    volume: estimatedDailyVolume
                 });
             });
 
-            // 4. SORT BY ABSOLUTE HIGHEST MAX SLOT YIELD DOWNSCALE
             candidates.sort((a, b) => b.slotYield - a.slotYield);
             const topTenScalableFlips = candidates.slice(0, 10);
 
-            if (topTenFlipsLen = topTenScalableFlips.length === 0) {
+            if (topTenScalableFlips.length === 0) {
                 target.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs text-gray-500 leading-relaxed">Scanning OSRS markets... No high-yield scalable slots found meeting liquidity constraints. Refresh in a moment.</td></tr>`;
                 return;
             }
@@ -552,7 +563,7 @@
             } else {
                 const entryVal = parseInt(document.getElementById("input-entry").value);
                 const qtyVal = parseInt(document.getElementById("input-qty").value);
-                if (isNaN(entryVal) || isNaN(qtyVal)) return alert("Fill entry parameters cleanly.");
+                if (isNaN(entryVal) || iNaN(qtyVal)) return alert("Fill entry parameters cleanly.");
 
                 userDatabase.investments.push({ 
                     id: matchedMeta.id, name: rawName, qty: qtyVal, entryCost: entryVal, exitTarget: Math.round(entryVal * 1.12) 
